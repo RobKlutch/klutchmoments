@@ -1,0 +1,93 @@
+Regression after gating change. Spotlight never renders. Requesting targeted fixes and proof.
+
+Team,
+
+I re-tested the full workflow after your latest “selection-driven gating” changes.
+
+Summary
+
+Environment: Replit, Video Preview stage.
+
+Steps: Select player in Timeline. Open Preview. Play 10–15 seconds.
+
+Expected: Spotlight appears on selection and follows only the selected player, frame by frame.
+
+Actual: No spotlight renders at all during playback.
+
+New regression
+
+Prior build showed the overlay (albeit incorrectly). Current build renders nothing in Preview. This indicates the new gating path or render loop is preventing draw, independent of tracking.
+
+What likely failed
+
+Gating expression is evaluating to false in practice, or the render path is not mounting or drawing.
+
+The HUD you described is not visible in my test, so I cannot verify your live booleans or coordinate transforms.
+
+Requested triage checklist
+Please verify these in real playback and expose the values on the on-screen HUD by default.
+
+Gating and selection
+
+Confirm selectedPlayerId is non-null immediately after selection and remains stable.
+
+Confirm isManuallySelected flips to true on selection and is included in the gating expression.
+
+Confirm selectedActivationTime is computed and displayed.
+
+Box availability for the selected ID
+
+Confirm hasValidBoxForSelected transitions to true within a few frames after selection.
+
+If track gaps occur, enable a gap-bridge window that freezes last known position for N frames rather than suppressing draw.
+
+Final gating boolean
+
+Show the exact final boolean used to render. I need to see a single line:
+isSpotlightActive = hasSelectedPlayer && (isManuallySelected || currentVideoTime >= selectedActivationTime) && hasValidBoxForSelected
+
+Remove any implicit fallbacks such as || !!trackingBox.
+
+Render loop and mounting
+
+Confirm the overlay element is actually mounted, has non-zero width and height, sits above the video, and is not cleared by a “not visible” path.
+
+Ensure a single requestAnimationFrame loop updates state before draw. No competing timers.
+
+Coordinate pipeline sanity
+
+Display on the HUD each frame:
+
+selectedPlayerId, isManuallySelected, selectedActivationTime, currentVideoTime
+
+Raw detector box for the selected ID in video coordinates
+
+Transformed overlay box in pixels
+
+videoContentRect, overlayRect, devicePixelRatio
+
+The final isSpotlightActive boolean
+
+Fast isolation steps
+
+Temporarily set a diagnostic flag that forces isSpotlightActive true only when selectedPlayerId is set. If the overlay still does not appear, the failure is in mounting or draw, not gating.
+
+If it appears but off-position, the failure is in coordinate transform or clamping.
+
+If it appears correctly with the diagnostic flag but disappears with the normal expression, the failure is in the gating terms, most likely hasValidBoxForSelected never becoming true due to ID mismatch.
+
+Acceptance criteria to close
+
+Overlay appears only after selection or at the selected activation time.
+
+Overlay adheres to the selected player with smooth motion and no drift.
+
+Quantitative:
+
+IoU with the selected player’s box ≥ 0.6 for at least 95% of frames over a 10-second clip at 1080p.
+
+Max positional error ≤ 20 px at 1080p.
+
+Zero frames drawn outside the selected player while a valid box exists.
+
+Provide a 20–30 second screen recording with the HUD enabled showing all gating terms and coordinates turning true when expected. Include commit SHAs.

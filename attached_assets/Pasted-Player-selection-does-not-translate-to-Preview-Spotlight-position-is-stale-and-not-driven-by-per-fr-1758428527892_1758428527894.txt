@@ -1,0 +1,99 @@
+Player selection does not translate to Preview. Spotlight position is stale and not driven by per-frame tracking.
+
+Team,
+
+I re-tested and captured four screenshots across stages. The core failure persists: the player selected in Timeline does not drive the spotlight in Preview. The spotlight either appears at t=0 or stays pinned at a constant position throughout playback, rather than following the selected player.
+
+Summary of evidence
+
+Timeline stage: player is clearly selectable with labeled IDs. Detection point is ~0:06.
+
+Effects stage: Spotlight Ring is selected. Live preview claims smooth tracking.
+
+Preview HUD at t=0.000: selectedActivationTime ≈ 5.98 s, yet isSpotlightActive = YES and boxTimestamp = 0.000 s.
+
+Preview HUD at t=6.516: currentVideoTime = 6.516 s, trackingBoxId = selectedPlayerId, ID Match = YES, hasValidBoxForSelected = YES, but Pos stays fixed at (0.022, 0.433), identical to the initial value.
+
+Diagnosis
+
+Gating has improved but the position used for rendering is not the per-frame center of the selected player’s box. The overlay is using a stale coordinate captured at selection or at t=0, not the box for sampleTime.
+
+At 6.516 s the HUD shows perfect ID and timestamp alignment, yet the overlay position is unchanged. That isolates the fault to the final position source used by the renderer.
+
+Required fixes
+
+Make the per-frame tracked box the single source of truth for position
+Compute on every requestAnimationFrame and use only this for drawing:
+
+const t = videoRef.current?.currentTime ?? 0;
+const sampleTime = t + clipStartOffset;
+
+const box = getBoxByIdAtTime(selectedPlayerId, sampleTime, { interpolate: true, window: 1/30 });
+const hasValidBoxForSelected = Boolean(box);
+
+const boxCenterNorm = hasValidBoxForSelected
+  ? { x: box.cx, y: box.cy }        // normalized [0..1] in video frame space
+  : null;
+
+const overlayPosPx = boxCenterNorm
+  ? {
+      x: videoContentRect.left + boxCenterNorm.x * videoContentRect.width,
+      y: videoContentRect.top  + boxCenterNorm.y * videoContentRect.height
+    }
+  : null;
+
+
+Do not use any position derived from Timeline or a cached selection click while a tracked box exists.
+
+Remove hidden fallbacks
+
+Eliminate proximity or any “any box exists” fallback while a player is selected.
+
+Remove residual paths like || !!trackingBox or alternate “effectiveVisibility” booleans that can override the final value.
+
+Enforce clean stage transitions
+
+On entering Preview or changing selection, reset lastBox, lastPos, smoothing state, freeze counters, and any timers.
+
+manualSelectionInPreview must be scoped to Preview only and must not leak from Timeline.
+
+Keep a single render boolean used by both HUD and renderer
+
+const canActivateByTime   = sampleTime + EPS >= selectedActivationTime;
+const canActivateByManual = manualSelectionInPreview && hasValidBoxForSelected;
+
+const isSpotlightActive =
+  prerequisitesReady && hasSelectedPlayer &&
+  (canActivateByTime || canActivateByManual) &&
+  hasValidBoxForSelected;
+
+
+Use this exact value to render and to display in the HUD. If HUD boolean differs from renderer boolean, log an error with inputs.
+
+HUD fields required for verification
+
+currentVideoTime, clipStartOffset, sampleTime
+
+selectedActivationTime
+
+selectedPlayerId, trackingBoxId, ID Match
+
+boxTimestamp and absolute difference to sampleTime
+
+overlayPosPx.x and overlayPosPx.y
+
+hasValidBoxForSelected, freezeActive, framesSinceLastValid
+
+final isSpotlightActive used by the renderer
+
+Acceptance criteria to close
+
+No overlay at t=0 unless the user manually selects in Preview at t=0.
+
+At or after selectedActivationTime the overlay follows only the selected player, frame by frame, with smooth motion.
+
+Quantitative: IoU with the selected player box ≥ 0.6 for at least 95 percent of frames over a 10 second clip at 1080p. Max positional error ≤ 20 px. Zero frames where the overlay is outside the selected player while a valid box exists.
+
+Deliver a 20–30 second screen recording with the HUD showing sampleTime and boxTimestamp advancing, trackingBoxId equals selectedPlayerId, and overlayPosPx changing each frame in step with the player. Include commit SHAs.
+
+This remains a blocker for the Klutch workflow. Please confirm ownership and provide the verification recording once these fixes are applied.

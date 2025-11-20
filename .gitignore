@@ -1,0 +1,15 @@
+node_modules
+dist
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+
+# Security - Prevent sensitive files from being committed
+*.cookies.txt
+admin_cookies.txt
+cookies.txt
+*.session
+*.key
+.env.local
+.env.production

@@ -1,0 +1,98 @@
+Regression and persisting failure. Replace gating logic and complete end-to-end fix.
+
+Team,
+
+I re-ran the workflow after your latest changes. Two issues remain:
+
+Core failure persists
+
+The spotlight still adheres to the left side of the video surface and does not stay on the selected player during playback.
+
+New regression introduced
+
+The spotlight now appears at the very start of playback when no player is selected. It must not render until the selected player’s activation point.
+
+Findings
+
+Your gating condition includes || !!trackingBox. This renders the overlay whenever any tracking box exists, even before a player is selected or before the selected player appears. This explains the startup pop-in with no player present.
+
+Logs still show effectiveVisibility:false even when isVisible:true and hasTrackingBox:true. That indicates a mismatch between state and render conditions and likely a transform pipeline issue remains.
+
+Required corrections
+
+A) Replace the activation gating with selection-driven logic
+
+Render only when all are true:
+
+selectedPlayerId is set.
+
+(isManuallySelected == true) OR (currentVideoTime + ε >= selectedActivationTime).
+Define selectedActivationTime as the earlier of:
+
+The selection timestamp from Timeline for this clip, or
+
+The first timestamp at which the selected player’s track exists in the current clip.
+
+A valid box exists for selectedPlayerId this frame, or use last valid box for N frames as a gap-bridge.
+
+Remove || !!trackingBox. Never render based solely on the existence of any box.
+
+B) Enforce strict ID-lock in rendering
+
+When selectedPlayerId is set, draw only that ID’s box. Disable proximity fallbacks while selected.
+
+If the box is missing, freeze last known good position for a short gap window rather than jump to edges or another player.
+
+C) Complete the coordinate pipeline fix
+
+Compute the video content rectangle inside the player each frame (getBoundingClientRect of the video, then derive the content rect using the intrinsic video aspect and object-fit).
+
+Map tracking boxes: video frame coords → normalized [0..1] → overlay pixels inside content rect, respecting devicePixelRatio.
+
+Ensure no CSS transforms are applied to the video that are not mirrored to the overlay. Clamp overlay drawing to the content rect.
+
+D) Single update loop ordering
+
+Update tracking state first, then draw overlay within the same requestAnimationFrame. Disable competing timers.
+
+Instrumentation required to verify
+
+On-screen debug for each frame:
+
+selectedPlayerId, isManuallySelected, selectedActivationTime, currentVideoTime.
+
+Raw detector box for selectedPlayerId in video-frame coords.
+
+Transformed overlay box in pixels.
+
+videoContentRect, overlayRect, devicePixelRatio.
+
+Final boolean used to render: isSpotlightActive.
+
+Remove !!trackingBox from the final boolean and include the full expression in the overlay readout for validation.
+
+Acceptance criteria to close
+
+No overlay until selection logic is satisfied. Specifically, at t=0 with no selection, the overlay is not drawn even if tracking boxes exist.
+
+After selection, the overlay follows only the selected player with smooth adherence.
+
+Quantitative:
+
+IoU with the selected player’s box ≥ 0.6 for ≥ 95% of frames over a 10-second clip at 1080p.
+
+Max positional error ≤ 20 px at 1080p.
+
+Zero frames where the overlay is outside the selected player while a valid box exists.
+
+Provide a 20–30 second screen recording with the debug overlay enabled that demonstrates the above on the same clip I used to reproduce. Include commit SHAs.
+
+Interim safeguards
+
+Remove || !!trackingBox immediately.
+
+Require selectedPlayerId != null for any render.
+
+Freeze last valid position for short gaps. No proximity fallback while selected.
+
+Clamp to the computed content rect to prevent left-edge sticking.
