@@ -13,3 +13,25 @@ cookies.txt
 *.key
 .env.local
 .env.production
+# Replit / Python env
+.local/
+
+# Node / Vite
+node_modules/
+dist/
+
+# Python cache
+__pycache__/
+
+# Temp / uploads (if you do not want raw uploads in Git)
+temp/
+uploads/
+processed/
+
+.local/
+__pycache__/
+*.pyc
+temp/
+uploads/
+processed/
+attached_assets/
