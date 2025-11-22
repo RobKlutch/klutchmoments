@@ -20,14 +20,13 @@ import {
   Star,
   Eye
 } from "lucide-react";
-import klutchLogo from "@assets/logo white_1757726855246.png";
-import threeAthletes from "@assets/generated_images/Three_athletes_with_circular_spotlights_58ae1a48.png";
-import soccerVideo from "@assets/Alex Goal 2_1757645054056.mp4";
-import soccerProcessed from "@assets/highlight beam_1757639302713.png";
-import spotlightDemo from "@assets/generated_images/Three_athletes_with_wider_beams_716f9555.png";
-import basketballSpotlight from "@assets/generated_images/Three_athletes_with_wider_beams_716f9555.png";
-import soccerSpotlight from "@assets/generated_images/Three_athletes_with_circular_spotlights_58ae1a48.png";
-import volleyballSpotlight from "@assets/generated_images/Three_athletes_with_subtle_beam_38c9fb72.png";
+import {
+  HERO_BACKGROUND_IMAGE,
+  HERO_SPOTLIGHT_IMAGE,
+  KLUTCH_LOGO_URL,
+  SOCCER_SPOTLIGHT_IMAGE,
+  VOLLEYBALL_SPOTLIGHT_IMAGE,
+} from "@/constants/media";
 
 interface SportAssets {
   original: string;
@@ -43,20 +42,20 @@ export default function Hero() {
 
   const sportsAssets: Record<string, SportAssets> = {
     basketball: {
-      original: threeAthletes,
-      spotlight: basketballSpotlight,
+      original: HERO_BACKGROUND_IMAGE,
+      spotlight: HERO_SPOTLIGHT_IMAGE,
       sport: 'Basketball',
       description: 'Amazing crossover and finish'
     },
     soccer: {
-      original: threeAthletes,
-      spotlight: soccerSpotlight,
-      sport: 'Soccer', 
+      original: HERO_BACKGROUND_IMAGE,
+      spotlight: SOCCER_SPOTLIGHT_IMAGE,
+      sport: 'Soccer',
       description: 'Goal-scoring run and shot'
     },
     volleyball: {
-      original: threeAthletes,
-      spotlight: volleyballSpotlight,
+      original: HERO_BACKGROUND_IMAGE,
+      spotlight: VOLLEYBALL_SPOTLIGHT_IMAGE,
       sport: 'Volleyball',
       description: 'Perfect spike technique'
     }
@@ -105,8 +104,8 @@ export default function Hero() {
       {/* Athletes Showcase Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0">
-          <img 
-            src={threeAthletes} 
+          <img
+            src={HERO_BACKGROUND_IMAGE}
             alt="Three athletes with AI spotlight effects"
             className="w-full h-full object-cover opacity-50"
             data-testid="img-hero-background"
@@ -119,10 +118,10 @@ export default function Hero() {
 
       {/* Logo Overlay */}
       <div className="absolute top-6 left-6 md:top-8 md:left-8 z-10">
-        <img 
-          src={klutchLogo} 
-          alt="Klutch logo" 
-          className="w-36 md:w-44 h-auto drop-shadow-2xl" 
+        <img
+          src={KLUTCH_LOGO_URL}
+          alt="Klutch logo"
+          className="w-36 md:w-44 h-auto drop-shadow-2xl"
           data-testid="img-logo-hero"
         />
       </div>

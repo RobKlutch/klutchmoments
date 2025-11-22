@@ -3,7 +3,7 @@ import { Menu, Sun, Moon, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
-import klutchLogo from "@assets/logo white_1757726855246.png";
+import { KLUTCH_LOGO_URL } from "@/constants/media";
 
 interface HeaderProps {
   onThemeToggle?: () => void;
@@ -28,10 +28,10 @@ export default function Header({ onThemeToggle, isDark = false }: HeaderProps) {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center">
-          <img 
-            src={klutchLogo} 
-            alt="Klutch logo" 
-            className="h-7 md:h-8 w-auto cursor-pointer" 
+          <img
+            src={KLUTCH_LOGO_URL}
+            alt="Klutch logo"
+            className="h-7 md:h-8 w-auto cursor-pointer"
             data-testid="img-logo-header"
             onClick={() => setLocation("/")}
           />

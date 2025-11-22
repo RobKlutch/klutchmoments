@@ -43,20 +43,29 @@ interface DetectionResponse {
 
 class RealYOLOv8DetectionService {
   private pythonWorker: any = null;
-  private modelPath: string;
+  private modelPath?: string;
   private workerPath: string;
   private isInitialized: boolean = false;
   private pendingRequests: Map<string, { resolve: Function, reject: Function }> = new Map();
 
   constructor() {
-    this.modelPath = path.join(process.cwd(), 'yolo11n.onnx'); // Use YOLO11n ONNX model
+    // Local model path is optional now that Replicate handles highlight inference.
+    // If you want to keep the legacy ONNX worker for experimentation, set
+    // LOCAL_YOLO_MODEL_PATH to the absolute path of the ONNX file.
+    this.modelPath = process.env.LOCAL_YOLO_MODEL_PATH;
     this.workerPath = path.join(process.cwd(), 'yolo_worker.py');
   }
 
   async initialize(): Promise<boolean> {
     try {
       console.log('🚀 Initializing Real YOLOv8 detection service...');
-      
+
+      if (!this.modelPath) {
+        console.warn('⚠️ LOCAL_YOLO_MODEL_PATH not set; skipping local ONNX worker startup.');
+        this.isInitialized = true;
+        return true;
+      }
+
       // Create persistent Python worker script
       await this.createWorkerScript();
       

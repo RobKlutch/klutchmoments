@@ -1,0 +1,22 @@
+# BoT-SORT tuned for soccer re-identification and long occlusions
+tracker_type: botsort
+track_buffer: 90
+conf_thres: 0.35
+match_thresh: 0.9
+proximity_thresh: 0.6
+appearance_thresh: 0.32
+with_reid: true
+reid_model: osnet_x0_25_msmt17
+max_age: 120
+min_hits: 2
+frame_rate: 30
+afm: true
+new_track_thresh: 0.75
+lost_track_buffer: 40
+# Camera motion compensation using ORB for stadium pans/zooms
+gmc_method: orb
+fuse_scores: true
+max_detect: 300
+# IoU + cosine fusion keeps identities stable during crowding
+lambda_time: 0.95
+lambda_association: 0.6

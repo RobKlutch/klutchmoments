@@ -1,0 +1,17 @@
+build:
+  gpu: true
+  cuda: "12.1"
+  python_version: "3.11"
+  system_packages:
+    - ffmpeg
+    - libgl1
+  python_packages:
+    - torch==2.5.0
+    - torchvision==0.20.0
+    - torchaudio==2.5.0
+    - ultralytics==8.3.28
+    - supervision==0.20.0
+    - opencv-python-headless==4.10.0.84
+    - numpy==1.26.4
+predict: predict.py:Predictor
+train: train.py:Trainer

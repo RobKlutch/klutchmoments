@@ -20,6 +20,7 @@ import { initializeWebSocketServer, getWebSocketServer } from "./websocketServer
 import { randomUUID } from "crypto";
 import { assignConsistentPlayerIDs, applySpatialTrackingToResponse, getLatestTrackedPlayers } from './utils/spatialTracking';
 import { realYolov8DetectionService } from './services/realYolov8Detection';
+import { highlightJobRequestSchema, insertHighlightJob, processHighlightJob, getHighlightJob } from "./services/highlightJobService";
 
 // YOLOv8-ONLY ARCHITECTURE: No external service dependencies
 // All detection integrated directly into main application
@@ -873,6 +874,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Tracking reset error:", error);
       res.status(500).json({ error: "Failed to reset tracking state" });
+    }
+  });
+
+  // Highlight processing is placed inside the main Express router so Vercel/Vite only needs a single API entrypoint.
+  app.post("/api/highlight-jobs", async (req, res) => {
+    const validation = highlightJobRequestSchema.safeParse(req.body);
+
+    if (!validation.success) {
+      return res.status(400).json({ error: "Invalid request", details: validation.error.errors });
+    }
+
+    const jobRequest = validation.data;
+    if (!jobRequest.videoUrl && !jobRequest.videoId) {
+      return res.status(400).json({ error: "Provide either videoUrl or videoId" });
+    }
+
+    try {
+      const job = await insertHighlightJob(jobRequest, req.user?.id);
+
+      res.status(202).json({
+        id: job.id,
+        status: job.status,
+        spotlight: job.spotlight_settings,
+        videoUrl: job.video_url,
+        message: "Highlight processing started",
+      });
+
+      void processHighlightJob(job.id, jobRequest);
+    } catch (error) {
+      console.error("Failed to create highlight job", error);
+      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to start highlight job" });
+    }
+  });
+
+  app.get("/api/highlight-jobs/:id", async (req, res) => {
+    try {
+      const job = await getHighlightJob(req.params.id);
+      if (!job) {
+        return res.status(404).json({ error: "Highlight job not found" });
+      }
+
+      res.json({
+        id: job.id,
+        status: job.status,
+        boundingBoxes: job.bounding_boxes,
+        spotlight: job.spotlight_settings,
+        modelName: job.model_name,
+        videoUrl: job.video_url,
+        updatedAt: job.updated_at,
+      });
+    } catch (error) {
+      console.error("Failed to fetch highlight job", error);
+      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to fetch highlight job" });
     }
   });
 

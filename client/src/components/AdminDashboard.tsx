@@ -34,7 +34,7 @@ import {
   UserX
 } from "lucide-react";
 import { Link } from "wouter";
-import klutchLogo from "@assets/klutch (2)_1757644634520.png";
+import { KLUTCH_LOGO_URL } from "@/constants/media";
 
 // Type definitions for API responses
 interface AdminStats {
@@ -152,7 +152,7 @@ export default function AdminManagement({ userRole }: AdminManagementProps) {
         <div className="flex items-center gap-4">
           <div className="rounded-md px-2 py-1 bg-white/90 dark:bg-white/90">
             <img 
-              src={klutchLogo} 
+              src={KLUTCH_LOGO_URL}
               alt="Klutch logo" 
               className="h-5 md:h-6 w-auto" 
               data-testid="img-logo-admin"

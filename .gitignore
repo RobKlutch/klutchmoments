@@ -35,3 +35,7 @@ temp/
 uploads/
 processed/
 attached_assets/
+client/src/assets/
+replicate-model/attached_assets/
+replicate-model/weights/
+gpu_service/*.onnx

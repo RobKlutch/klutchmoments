@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Redirect } from "wouter";
 import { Loader2, Zap, Users, Upload, ArrowLeft } from "lucide-react";
-import klutchLogo from "@assets/klutch (2)_1757644634520.png";
+import { KLUTCH_LOGO_URL } from "@/constants/media";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation, forgotPasswordMutation } = useAuth();
@@ -46,10 +46,10 @@ export default function AuthPage() {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
               <div className="rounded-md px-3 py-2 bg-white/90 dark:bg-white/90">
-                <img 
-                  src={klutchLogo} 
-                  alt="Klutch logo" 
-                  className="w-40 md:w-48 h-auto" 
+                <img
+                  src={KLUTCH_LOGO_URL}
+                  alt="Klutch logo"
+                  className="w-40 md:w-48 h-auto"
                   data-testid="img-logo-auth"
                 />
               </div>

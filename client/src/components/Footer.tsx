@@ -1,4 +1,4 @@
-import klutchLogo from "@assets/logo white_1757726855246.png";
+import { KLUTCH_LOGO_URL } from "@/constants/media";
 
 export default function Footer() {
   return (
@@ -7,10 +7,10 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Logo and Description */}
           <div className="flex flex-col items-center md:items-start gap-3">
-            <img 
-              src={klutchLogo} 
-              alt="Klutch logo" 
-              className="h-5 w-auto" 
+            <img
+              src={KLUTCH_LOGO_URL}
+              alt="Klutch logo"
+              className="h-5 w-auto"
               data-testid="img-logo-footer"
             />
             <p className="text-sm text-muted-foreground text-center md:text-left">

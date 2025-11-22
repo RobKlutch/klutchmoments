@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Link, useLocation } from "wouter";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
-import klutchLogo from "@assets/klutch (2)_1757644634520.png";
+import { KLUTCH_LOGO_URL } from "@/constants/media";
 
 export default function ResetPasswordPage() {
   const { resetPasswordMutation } = useAuth();
@@ -106,10 +106,10 @@ export default function ResetPasswordPage() {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
               <div className="rounded-md px-3 py-2 bg-white/90 dark:bg-white/90">
-                <img 
-                  src={klutchLogo} 
-                  alt="Klutch logo" 
-                  className="w-40 md:w-48 h-auto" 
+                <img
+                  src={KLUTCH_LOGO_URL}
+                  alt="Klutch logo"
+                  className="w-40 md:w-48 h-auto"
                   data-testid="img-logo-reset"
                 />
               </div>

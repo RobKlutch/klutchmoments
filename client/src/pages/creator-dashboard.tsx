@@ -32,6 +32,7 @@ import VideoPreviewPlayer from "@/components/VideoPreviewPlayer";
 import VideoEffectsCompositor from "@/components/VideoEffectsCompositor";
 import VideoPreview from "@/components/VideoPreview";
 import ProcessingWorkflow from "@/components/ProcessingWorkflow";
+import HighlightJobStatus from "@/components/HighlightJobStatus";
 
 // Workflow state types for creator dashboard
 interface CreatorWorkflowState {
@@ -54,6 +55,10 @@ interface CreatorWorkflowState {
   debugData?: any;
   jobConfig?: any;
   jobId?: string;
+  highlightJobId?: string;
+  highlightJobStatus?: string;
+  highlightResult?: any;
+  highlightJobError?: string;
 }
 
 export default function CreatorDashboard() {
@@ -75,7 +80,11 @@ export default function CreatorDashboard() {
     processedVideoBlob: null,
     processingProgress: 0,
     processingLogs: [],
-    debugData: null
+    debugData: null,
+    highlightJobId: undefined,
+    highlightJobStatus: undefined,
+    highlightResult: undefined,
+    highlightJobError: undefined
   });
 
   // Authentication check
@@ -269,7 +278,7 @@ export default function CreatorDashboard() {
     addLog('Effect confirmed, moving to video preview');
   };
 
-  const handleVideoPreviewConfirm = () => {
+  const handleVideoPreviewConfirm = async () => {
     try {
       // **ARCHITECT RECOMMENDED FIX**: Explicit safe player validation and job config creation
       if (!workflow.videoFile || !workflow.timeSelection || !workflow.selectedPlayer || !workflow.selectedEffect) {
@@ -319,11 +328,59 @@ export default function CreatorDashboard() {
       setWorkflow(prev => ({
         ...prev,
         step: 'processing',
-        jobConfig
+        jobConfig,
+        highlightJobStatus: 'queued',
+        highlightJobError: undefined,
       }));
-      
+
       addLog(`Starting video processing: ${workflow.timeSelection.start}s to ${workflow.timeSelection.end}s with player ${playerData.id}`);
-      
+
+      try {
+        const response = await fetch('/api/highlight-jobs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            videoUrl: workflow.videoUrl || undefined,
+            videoId: workflow.videoFile?.name || undefined,
+            playerSelection: {
+              id: playerData.id,
+              boundingBox: {
+                x: playerData.x,
+                y: playerData.y,
+                width: playerData.width || 0.1,
+                height: playerData.height || 0.1
+              },
+              frameTimeMs: Math.round((workflow.timeSelection.start || 0) * 1000)
+            },
+            spotlight: {
+              type: jobConfig.effectConfig.type,
+              ...jobConfig.effectConfig.settings
+            }
+          })
+        });
+
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error || 'Failed to start highlight job');
+        }
+
+        setWorkflow(prev => ({
+          ...prev,
+          highlightJobId: payload.id,
+          highlightJobStatus: payload.status,
+        }));
+        addLog(`Highlight job queued: ${payload.id}`);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to start highlight job';
+        setWorkflow(prev => ({
+          ...prev,
+          highlightJobError: message,
+          highlightJobStatus: 'failed',
+        }));
+        addLog(`Highlight job failed to start: ${message}`);
+      }
+
     } catch (error) {
       // **ARCHITECT RECOMMENDED**: Catch ReferenceErrors and surface them
       const errorId = `ERR_${Date.now()}_${Math.random().toString(36).substr(2, 11)}`;
@@ -371,6 +428,26 @@ export default function CreatorDashboard() {
     addLog(`Video processing complete for job: ${jobId}`);
   };
 
+  const handleHighlightJobComplete = (jobId: string, payload?: any) => {
+    setWorkflow(prev => ({
+      ...prev,
+      jobId,
+      highlightJobStatus: 'done',
+      highlightResult: payload?.boundingBoxes,
+      step: 'preview'
+    }));
+    addLog(`Highlight ready for download: ${jobId}`);
+  };
+
+  const handleHighlightJobError = (message: string) => {
+    setWorkflow(prev => ({
+      ...prev,
+      highlightJobStatus: 'failed',
+      highlightJobError: message,
+    }));
+    addLog(`Highlight job error: ${message}`);
+  };
+
   const handleProcessingProgress = (progress: number) => {
     setWorkflow(prev => ({
       ...prev,
@@ -405,7 +482,11 @@ export default function CreatorDashboard() {
       processedVideoBlob: null,
       processingProgress: 0,
       processingLogs: [],
-      debugData: null
+      debugData: null,
+      highlightJobId: undefined,
+      highlightJobStatus: undefined,
+      highlightResult: undefined,
+      highlightJobError: undefined
     });
     addLog('Workflow restarted');
   };
@@ -648,7 +729,21 @@ export default function CreatorDashboard() {
               </Card>
             )}
 
-            {workflow.step === 'processing' && workflow.videoFile && workflow.jobConfig && (
+            {workflow.step === 'processing' && workflow.highlightJobId && (
+              <HighlightJobStatus
+                jobId={workflow.highlightJobId}
+                onComplete={handleHighlightJobComplete}
+                onError={handleHighlightJobError}
+              />
+            )}
+
+            {workflow.step === 'processing' && workflow.highlightJobError && (
+              <Card className="p-4 border-destructive/50 bg-destructive/5">
+                <p className="text-sm text-destructive">{workflow.highlightJobError}</p>
+              </Card>
+            )}
+
+            {workflow.step === 'processing' && workflow.videoFile && workflow.jobConfig && !workflow.highlightJobId && !workflow.highlightJobError && (
               <ProcessingWorkflow
                 videoFile={workflow.videoFile}
                 jobConfig={workflow.jobConfig}
@@ -672,6 +767,11 @@ export default function CreatorDashboard() {
                     <p className="text-muted-foreground mb-4">
                       Job ID: <Badge variant="secondary">{workflow.jobId}</Badge>
                     </p>
+                    {workflow.highlightResult && (
+                      <p className="text-xs text-muted-foreground">
+                        {workflow.highlightResult.frames?.length || 0} frames ready for spotlight overlays
+                      </p>
+                    )}
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Button 
                         onClick={async () => {
