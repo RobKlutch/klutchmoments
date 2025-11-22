@@ -329,7 +329,7 @@ export default function CreatorDashboard() {
         ...prev,
         step: 'processing',
         jobConfig,
-        highlightJobStatus: 'queued',
+        highlightJobStatus: 'pending',
         highlightJobError: undefined,
       }));
 

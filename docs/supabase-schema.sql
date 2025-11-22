@@ -6,15 +6,14 @@ create extension if not exists "pgcrypto";
 -- Simple status guard instead of a custom enum for portability
 create table if not exists public.highlight_jobs (
   id uuid primary key default gen_random_uuid(),
-  user_id text,
-  video_url text,
-  video_reference text,
+  user_id uuid,
+  video_url text not null,
   player_id text,
   model_name text,
   spotlight_type text,
   spotlight_settings jsonb,
   bounding_boxes jsonb,
-  status text not null default 'queued' check (status in ('queued', 'processing', 'done', 'failed')),
+  status text not null default 'pending' check (status in ('pending', 'processing', 'done', 'failed')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

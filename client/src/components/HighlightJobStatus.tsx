@@ -10,10 +10,10 @@ interface HighlightJobStatusProps {
   onError?: (message: string) => void;
 }
 
-type JobStatus = "queued" | "processing" | "done" | "failed";
+type JobStatus = "pending" | "processing" | "done" | "failed";
 
 export function HighlightJobStatus({ jobId, onComplete, onError }: HighlightJobStatusProps) {
-  const [status, setStatus] = useState<JobStatus>("queued");
+  const [status, setStatus] = useState<JobStatus>("pending");
   const [progress, setProgress] = useState(10);
   const [boundingBoxes, setBoundingBoxes] = useState<any>(null);
   const [message, setMessage] = useState<string>("Analyzing players…");
@@ -68,7 +68,7 @@ export function HighlightJobStatus({ jobId, onComplete, onError }: HighlightJobS
   }, [jobId, onComplete, onError]);
 
   const statusCopy: Record<JobStatus, string> = {
-    queued: "Queued",
+    pending: "Queued",
     processing: "Processing",
     done: "Completed",
     failed: "Failed",

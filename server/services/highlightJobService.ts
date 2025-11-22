@@ -87,19 +87,24 @@ async function supabaseRequest<T>(path: string, options: RequestInit & { useServ
 }
 
 export async function insertHighlightJob(request: HighlightJobRequest, userId?: string) {
+  const videoReference = request.videoUrl || request.videoId;
+
+  if (!videoReference) {
+    throw new Error("A videoUrl or videoId is required to create a highlight job");
+  }
+
   const payload = {
     id: randomUUID(),
     user_id: userId || null,
-    video_url: request.videoUrl || null,
+    video_url: videoReference,
     player_id: request.playerSelection.id,
     model_name: REPLICATE_YOLO_MODEL || null,
     spotlight_type: request.spotlight.type,
     spotlight_settings: request.spotlight,
     bounding_boxes: null,
-    status: "queued",
+    status: "pending",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    video_reference: request.videoId || null,
   } as Record<string, any>;
 
   const rows = await supabaseRequest<any[]>(
