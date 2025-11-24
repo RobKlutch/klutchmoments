@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Link, useLocation } from "wouter";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
-import klutchLogo from "@assets/klutch (2)_1757644634520.png";
+
+const klutchLogo = "/logo-dark.png";
 
 export default function ResetPasswordPage() {
   const { resetPasswordMutation } = useAuth();

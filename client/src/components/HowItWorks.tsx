@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Upload, Target, Download } from "lucide-react";
-import uploadImage from "@assets/upload_1760665296563.jpeg";
-import selectImage from "@assets/select_1760665448753.jpeg";
-import highlightImage from "@assets/highlight_1760665522407.jpeg";
+
+const uploadImage = "/upload-step.jpeg";
+const selectImage = "/select-step.jpeg";
+const highlightImage = "/highlight-step.jpeg";
 
 interface Step {
   id: number;

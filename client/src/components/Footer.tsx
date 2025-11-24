@@ -1,4 +1,4 @@
-import klutchLogo from "@assets/logo white_1757726855246.png";
+const klutchLogo = "/logo-white.png";
 
 export default function Footer() {
   return (

@@ -34,7 +34,8 @@ import {
   UserX
 } from "lucide-react";
 import { Link } from "wouter";
-import klutchLogo from "@assets/klutch (2)_1757644634520.png";
+
+const klutchLogo = "/logo-dark.png";
 
 // Type definitions for API responses
 interface AdminStats {
@@ -334,7 +335,7 @@ function UserManagement({ searchQuery, onSearchChange }: { searchQuery: string; 
   const [userFilter, setUserFilter] = useState("all");
 
   const { data: usersData, isLoading } = useQuery<UsersResponse>({
-    queryKey: ["/api/admin/users", { search: searchQuery, limit: 50 }]
+    queryKey: ["/api/admin/users"]
   });
 
   const suspendUserMutation = useMutation({
@@ -465,7 +466,7 @@ function UserManagement({ searchQuery, onSearchChange }: { searchQuery: string; 
 
 function OrderManagement({ searchQuery, onSearchChange }: { searchQuery: string; onSearchChange: (query: string) => void }) {
   const { data: ordersData, isLoading } = useQuery<OrdersResponse>({
-    queryKey: ["/api/admin/orders", { search: searchQuery, limit: 50 }]
+    queryKey: ["/api/admin/orders"]
   });
 
   const orders: Order[] = ordersData?.orders || [];
@@ -537,7 +538,7 @@ function HighlightManagement({ searchQuery, onSearchChange }: { searchQuery: str
   const { toast } = useToast();
   
   const { data: highlightsData, isLoading } = useQuery<HighlightsResponse>({
-    queryKey: ["/api/admin/highlights", { search: searchQuery, limit: 50 }]
+    queryKey: ["/api/admin/highlights"]
   });
 
   const deleteHighlightMutation = useMutation({

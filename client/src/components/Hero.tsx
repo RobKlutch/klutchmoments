@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import klutchLogo from "@assets/klutch (3)_1759631423457.png";
+
+const klutchLogo = "/logo-hero.png";
 
 export default function Hero() {
   const handleMakeMyMoment = () => {

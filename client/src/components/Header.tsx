@@ -3,7 +3,8 @@ import { Menu, Sun, Moon, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
-import klutchLogo from "@assets/logo white_1757726855246.png";
+
+const klutchLogo = "/logo-white.png";
 
 interface HeaderProps {
   onThemeToggle?: () => void;

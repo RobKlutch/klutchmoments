@@ -14,7 +14,8 @@ import { Loader2, Zap, Users, Upload, ArrowLeft } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { SiApple } from "react-icons/si";
 import { Separator } from "@/components/ui/separator";
-import klutchLogo from "@assets/klutch (2)_1757644634520.png";
+
+const klutchLogo = "/logo-dark.png";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation, forgotPasswordMutation } = useAuth();
