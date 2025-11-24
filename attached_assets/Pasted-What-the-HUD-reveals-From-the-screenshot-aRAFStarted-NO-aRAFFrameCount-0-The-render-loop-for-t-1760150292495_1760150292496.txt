@@ -1,0 +1,165 @@
+What the HUD reveals
+
+From the screenshot:
+
+aRAFStarted: NO, aRAFFrameCount: 0
+The render loop for the overlay is not running.
+
+currentVideoTime: 0.000s, sampleTime: 0.000s
+No timebase progression is detected.
+
+selectedActivationTime: nulls
+The Preview stage did not receive or compute the activation timestamp from Timeline.
+
+hasValidBoxForSelected: YES, ID Match: YES, selectedPlayerId: player_4
+Tracking is ready and a valid bbox exists for the selected player.
+
+final isSpotlightActive: YES while time is 0.000 and RAF is not started
+The effect activation gate is evaluating to true even though timebase and RAF are idle.
+
+contentRect: ~734×422.9, canvas: 848×480, dpr: 2.0
+Canvas size does not match the painted video rect. This risks spatial drift when the loop does run.
+
+Net: tracking is ready, but the Preview timebase and render loop are not engaged, and the activation gate is misconfigured. The effect shows in a static location at t=0 instead of appearing at the correct activation time and then tracking per frame.
+
+Why the spotlight is not appearing at the right time
+
+Activation timing is undefined
+selectedActivationTime is null, so the code cannot gate “when to show” based on the Timeline-selected start moment. Your logic is defaulting to active at t=0.
+
+No render loop
+aRAFStarted: NO means even if the overlay appears, it will not update frame by frame. You get a static effect.
+
+Coordinate surface mismatch
+canvas size differs from contentRect. When RAF starts, this will misalign the overlay.
+
+Required fixes
+A) Establish the timebase and activation gate
+
+On Preview entry, set activationTimeMs = segment.startMs from Timeline and store it.
+
+Gate the effect strictly by time and bbox availability.
+
+// On stage init
+state.activationTimeMs = segment.startMs;
+
+// In the render tick
+const tMs = video.currentTime * 1000;
+const readyTime = tMs >= state.activationTimeMs;
+const bbox = tracker.getBBox(subjectId, tMs);
+const hasBBox = bbox && bbox.w > 0 && bbox.h > 0;
+
+const show = readyTime && hasBBox;
+overlay.setVisible(show);
+
+
+If activation is “immediate at play,” set activationTimeMs to the exact playhead time when the user presses Play. Do not default to 0.
+
+B) Start exactly one RAF loop tied to playback
+
+Start RAF on play and seeked when video.readyState >= 2.
+
+Stop RAF on pause, ended, and on stage dispose.
+
+Record aRAFStarted = true after the first requestAnimationFrame callback is scheduled.
+
+let rafId: number | null = null;
+
+function startLoop() {
+  if (rafId) return;
+  hud.set('aRAFStarted', 'YES');
+  const tick = () => { renderFrame(); rafId = requestAnimationFrame(tick); };
+  rafId = requestAnimationFrame(tick);
+}
+function stopLoop() { if (rafId) cancelAnimationFrame(rafId); rafId = null; }
+video.addEventListener('play',  startLoop);
+video.addEventListener('pause', stopLoop);
+
+
+Optionally prefer requestVideoFrameCallback when available to sync to decoded frames.
+
+C) Fix the canvas-to-video mapping
+
+Size the canvas to the painted video rectangle, not the outer container, and multiply by DPR.
+
+const r = getPaintedVideoRect(videoEl); // letterbox compensated
+const dpr = window.devicePixelRatio || 1;
+
+canvas.width  = Math.round(r.width  * dpr);
+canvas.height = Math.round(r.height * dpr);
+canvas.style.width  = `${r.width}px`;
+canvas.style.height = `${r.height}px`;
+ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+
+Store contentRect and assert canvas equals it each time Preview mounts. The HUD should show matching values.
+
+D) Enforce the single-transform rule
+
+Keep coordinates in normalized video space from tracker.
+
+Convert once per frame to the painted video rectangle. Do not add letterbox offsets twice.
+
+function normCenterToTopLeftAbsolute(b, vRect) {
+  const x = vRect.left + (b.cx - b.w/2) * vRect.width;
+  const y = vRect.top  + (b.cy - b.h/2) * vRect.height;
+  const w = b.w * vRect.width;
+  const h = b.h * vRect.height;
+  return { x, y, w, h };
+}
+
+E) Validate Preview inputs on entry
+
+Block the stage if any of these are missing:
+
+segment.startMs, segment.endMs
+
+playerSeedBox from Timeline
+
+effectConfig from Effects
+
+Log once:
+
+[Preview] validate OK
+
+[Preview] activationTimeMs = <value>
+
+[Preview:first-raf:effectConfig]
+
+F) Make HUD truthful and actionable
+
+aRAFStarted flips to YES only after the first RAF is scheduled.
+
+selectedActivationTime must show a concrete value, never null, once Preview starts.
+
+final isSpotlightActive must reflect the actual visibility gate readyTime && hasBBox.
+
+Acceptance criteria for the fix
+
+On entering Preview, HUD shows:
+
+selectedActivationTime: <non-null time> equal to Timeline start.
+
+aRAFStarted: YES after Play.
+
+currentVideoTime advancing.
+
+At t < activation time, overlay is hidden even if a bbox exists.
+
+At t >= activation time and with a valid bbox, the spotlight appears and tracks the player smoothly.
+
+Canvas size equals contentRect and the effect remains aligned through resizes.
+
+Pausing stops RAF and hides the “advancing time” indicator. Resuming restarts RAF and tracking.
+
+Quick verification steps
+
+Start Preview. Confirm HUD shows a non-null activation time.
+
+Press Play. Confirm aRAFStarted flips to YES and currentVideoTime increases.
+
+Scrub before and after activation time. Verify overlay hides before and appears after.
+
+Toggle a temporary red debug rect to confirm z-order if the effect is hidden.
+
+Confirm canvas and contentRect match in HUD after a resize.

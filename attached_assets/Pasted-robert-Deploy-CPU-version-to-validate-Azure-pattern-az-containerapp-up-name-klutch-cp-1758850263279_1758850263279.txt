@@ -1,0 +1,108 @@
+robert [ ~ ]$ # Deploy CPU version to validate Azure pattern
+az containerapp up \
+  --name klutch-cpu-test \
+  --location westus3 \
+  --resource-group klutch-cpu-test \
+  --image python:3.11-slim \
+  --target-port 8000 \
+  --ingress external \
+  --command 'bash -c "pip install fastapi uvicorn torch opencv-python-headless && python -c \"
+from fastapi import FastAPI
+import uvicorn, torch, time
+import json
+
+app = FastAPI()
+
+@app.get('/health')
+def health():
+    return {
+        'status': 'healthy',
+        'mode': 'cpu-testing',
+        'gpu_available': False,
+        'cpu_cores': 2,
+        'torch_version': torch.__version__,
+        'deployment': 'azure-container-apps'
+    }
+
+@app.post('/api/detect-players')
+def detect():
+    start = time.time()
+    # Simulate CPU detection processing
+    time.sleep(0.1)  # Simulate 100ms CPU processing
+    processing_time = (time.time() - start) * 1000
+    
+    return {
+        'success': True,
+        'players': [
+            {'id': 1, 'x': 320, 'y': 240, 'confidence': 0.85, 'type': 'player'},
+            {'id': 2, 'x': 450, 'y': 180, 'confidence': 0.92, 'type': 'player'}
+        ],
+        'processing_time': processing_time,
+        'mode': 'cpu-simulation',
+\" > app.py && python app.py"'', port=8000) r in results) / len(results)
+unrecognized arguments: --command bash -c "pip install fastapi uvicorn torch opencv-python-headless && python -c \"
+from fastapi import FastAPI
+import uvicorn, torch, time
+import json
+
+app = FastAPI()
+
+@app.get(/health)
+def health():
+    return {
+        status: healthy,
+        mode: cpu-testing,
+        gpu_available: False,
+        cpu_cores: 2,
+        torch_version: torch.__version__,
+        deployment: azure-container-apps
+    }
+
+@app.post(/api/detect-players)
+def detect():
+    start = time.time()
+    # Simulate CPU detection processing
+    time.sleep(0.1)  # Simulate 100ms CPU processing
+    processing_time = (time.time() - start) * 1000
+    
+    return {
+        success: True,
+        players: [
+            {id: 1, x: 320, y: 240, confidence: 0.85, type: player},
+            {id: 2, x: 450, y: 180, confidence: 0.92, type: player}
+        ],
+        processing_time: processing_time,
+        mode: cpu-simulation,
+        model_type: CPU-HOG-fallback
+    }
+
+@app.post(/api/performance-test)
+def performance_test():
+    results = []
+    for i in range(10):
+        start = time.time()
+        time.sleep(0.05)  # Simulate CPU processing
+        processing_time = (time.time() - start) * 1000
+        results.append({
+            iteration: i + 1,
+            processing_time: processing_time
+        })
+    
+    avg_time = sum(r[processing_time] for r in results) / len(results)
+    return {
+        success: True,
+        summary: {
+            average_time: avg_time,
+            throughput: 1000 / avg_time,
+            mode: cpu-testing
+        },
+        results: results
+    }
+
+uvicorn.run(app, host=0.0.0.0, port=8000)
+\" > app.py && python app.py"
+
+Examples from AI knowledge base:
+https://aka.ms/cli_ref
+Read more about the command in reference docs
+robert [ ~ ]$ 

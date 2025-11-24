@@ -1,0 +1,192 @@
+that diagnosis tracks. If canvas.toBlob never fires, the capture promise never resolves, so no payload is sent to Replicate and the spotlight never arms. Here’s a precise fix plan with guardrails and a drop-in, battle-tested capture helper.
+
+Why toBlob hangs
+
+Common culprits:
+
+Canvas is zero-sized or detached when requestVideoFrameCallback (rVFC) runs.
+
+The <video> element is not ready (videoWidth/Height == 0 or readyState < 2).
+
+Cross-origin media taints the canvas (CORS), so browsers suppress toBlob or return null.
+
+Context lost or wrong context type (e.g., WebGL context lost, bitmaprenderer).
+
+Safari/older Chrome timing quirks: toBlob is throttled off-screen or never calls back during background tabs.
+
+You call toBlob during layout/size mutation; the pixel buffer isn’t ready.
+
+Non-negotiable preconditions
+
+video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+
+video.videoWidth > 0 && video.videoHeight > 0
+
+Canvas sized to painted video rect (letterbox compensated) and attached to DOM
+
+CORS: video.crossOrigin = "anonymous" and the source sends Access-Control-Allow-Origin:*
+
+2D context only for capture (getContext('2d', { willReadFrequently: true }))
+
+Drop-in safe capture helper (with timeouts and fallbacks)
+async function captureVideoFrame({
+  video,
+  canvas,
+  dpr = window.devicePixelRatio || 1,
+  timeoutMs = 300,
+}: {
+  video: HTMLVideoElement;
+  canvas: HTMLCanvasElement;
+  dpr?: number;
+  timeoutMs?: number;
+}): Promise<Blob> {
+  // Preconditions
+  if (!video || !canvas) throw new Error("capture: missing video/canvas");
+  if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA)
+    await waitForCanPlay(video);
+
+  // Size canvas to PAINTED video rect (letterbox-compensated)
+  const r = getPaintedVideoRect(video); // {left,top,width,height} in CSS px
+  if (r.width <= 0 || r.height <= 0) throw new Error("capture: zero-size canvas target");
+
+  canvas.style.width = `${r.width}px`;
+  canvas.style.height = `${r.height}px`;
+  canvas.width  = Math.max(1, Math.round(r.width * dpr));
+  canvas.height = Math.max(1, Math.round(r.height * dpr));
+
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) throw new Error("capture: 2D context unavailable");
+
+  // Ensure layout is settled before draw
+  await nextAnimationFrame();
+
+  // Draw current frame
+  try {
+    // Draw only the painted sub-rect (no black bars)
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, r.width, r.height);
+    ctx.drawImage(video, r.sx ?? 0, r.sy ?? 0, r.sw ?? video.videoWidth, r.sh ?? video.videoHeight,
+                        0,       0,       r.width,                       r.height);
+  } catch (e) {
+    throw new Error("capture: drawImage failed — possibly tainted video or detached element");
+  }
+
+  // Try toBlob with timeout; fallback to dataURL if needed
+  const blob = await toBlobWithTimeout(canvas, "image/jpeg", 0.92, timeoutMs)
+    .catch(async (e) => {
+      // Fallback path (Safari/background throttling or tainted behavior)
+      const url = canvas.toDataURL("image/jpeg", 0.92); // may throw on CORS; surface the error
+      return dataURLtoBlob(url);
+    });
+
+  if (!blob || !blob.size) throw new Error("capture: empty blob");
+  return blob;
+
+  // Helpers
+  function waitForCanPlay(v: HTMLVideoElement) {
+    return new Promise<void>((res, rej) => {
+      const onReady = () => { cleanup(); res(); };
+      const onErr = (e: any) => { cleanup(); rej(new Error("capture: video error")); };
+      const cleanup = () => { v.removeEventListener("loadeddata", onReady); v.removeEventListener("error", onErr); };
+      if (v.readyState >= 2) return res();
+      v.addEventListener("loadeddata", onReady, { once: true });
+      v.addEventListener("error", onErr, { once: true });
+    });
+  }
+  function nextAnimationFrame() {
+    return new Promise<void>((res) => requestAnimationFrame(() => res()));
+  }
+  function toBlobWithTimeout(
+    c: HTMLCanvasElement,
+    type: string,
+    quality: number,
+    ms: number
+  ): Promise<Blob> {
+    return new Promise<Blob>((res, rej) => {
+      let done = false;
+      const t = setTimeout(() => {
+        if (!done) { done = true; rej(new Error("capture: toBlob timeout")); }
+      }, ms);
+      try {
+        c.toBlob((b) => {
+          if (done) return;
+          done = true; clearTimeout(t);
+          if (!b) rej(new Error("capture: toBlob returned null"));
+          else res(b);
+        }, type, quality);
+      } catch (e) {
+        if (!done) { done = true; clearTimeout(t); rej(e); }
+      }
+    });
+  }
+  function dataURLtoBlob(dataUrl: string): Blob {
+    const idx = dataUrl.indexOf(",");
+    const b64 = dataUrl.slice(idx + 1);
+    const bin = atob(b64);
+    const len = bin.length;
+    const arr = new Uint8Array(len);
+    for (let i = 0; i < len; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: "image/jpeg" });
+  }
+}
+
+
+Replace your current capture path with await captureVideoFrame({...}). If the promise resolves, immediately post the blob to Replicate. If it throws, log the error code and show a small in-UI hint.
+
+Eventing and threading guardrails
+
+Prefer HTMLVideoElement.requestVideoFrameCallback to align capture with decoded frames. Inside the callback, call the helper above. If rVFC is unavailable, use RAF gated by video.paused === false and readyState >= 2.
+
+Never call toBlob after you’ve detached the canvas or the video (e.g., during unmount or stage transition).
+
+Avoid running capture while toggling CSS transforms/size on the canvas container. Do size first, then capture.
+
+If you render overlays into the same canvas, capture from a dedicated “capture canvas” that mirrors the painted video rect; don’t capture from a WebGL canvas or a canvas mid-composite.
+
+CORS checklist
+
+Set video.crossOrigin = "anonymous" before setting video.src.
+
+Ensure your CDN (or local server) responds with Access-Control-Allow-Origin: * for the video asset.
+
+Confirm no credentials/cookies are required for the media URL; otherwise CORS will fail.
+
+Quick test: canvas.toDataURL() inside a try/catch. A SecurityError means the canvas is tainted.
+
+HUD signals to add
+
+canvasSizePx vs contentRectPx and dpr
+
+captureState: idle|drawing|toBlob|posted|error
+
+toBlobLatencyMs and fallbackUsed: true|false
+
+isCanvasTainted: true|false (set true if a SecurityError is thrown)
+
+absQueryTimeMs (for the detection lookup you fixed earlier)
+
+Minimal logging you should now see
+
+🔧 DETECTION REQUEST - Including selectedPlayerId...
+
+🖼️ Creating capture blob...
+
+✅ toBlob ok (X ms) | size=Y KB
+
+🚚 POST replicate start
+
+✅ replicate 200
+
+If it still hangs
+
+Check if the canvas has width/height 0 or is display:none.
+
+Verify no OffscreenCanvas path is taken on the main thread (use HTMLCanvasElement for capture).
+
+Ensure you’re not inside a background tab; Chrome throttles timers and may defer callbacks. Use the timeout and fallback path.
+
+Confirm you aren’t drawing from a detached video element (e.g., new src set mid-capture).
+
+Tie-in to the spotlight
+
+Once frame capture is reliably producing blobs, your Replicate detections/track will resume, getBoxByIdAtTime(absTime) will return bboxes, and your overlay will gate visibility correctly against those bboxes. This removes the “static/frozen” effect failure you observed.

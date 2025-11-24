@@ -1,0 +1,185 @@
+Below is a concise, high-level overview of the Klutch workflow with each stage’s purpose, expected functions, and the critical data that must be passed forward to keep the experience seamless.
+
+1) Upload
+
+Purpose
+
+Ingest source video and initialize a new working session.
+
+Expected functions
+
+Accept MP4/MOV upload.
+
+Extract video metadata: width, height, fps, duration.
+
+Create a unique sessionId and videoId.
+
+Precompute keyframe index if available.
+
+Critical data to pass
+
+sessionId, videoId
+
+videoMeta { width, height, fps, durationMs }
+
+keyframeIndex or seek helper
+
+2) Timeline
+
+Purpose
+
+Set highlight window and capture the player context at the exact start time.
+
+Expected functions
+
+Scrub and pause at start timestamp.
+
+Run Detect Players on the paused frame.
+
+User selects the player to follow.
+
+Define clip window: startMs and endMs.
+
+Critical data to pass
+
+segment { startMs, endMs }
+
+playerSeedBox at startMs in normalized video space { cx, cy, w, h }
+
+selectedPlayerId if tracking IDs are already available
+
+detectionFrameIndex for reproducibility
+
+3) Effects
+
+Purpose
+
+Choose the visual effect to bind to the selected player and configure parameters.
+
+Expected functions
+
+Offer effect types: spotlight, disk, ring, etc.
+
+Adjust parameters: radius, intensity, color, opacity, duration.
+
+Validate against renderer capabilities.
+
+Save a single effectConfig object.
+
+Critical data to pass
+
+effectConfig { type, params, durationMs }
+
+bindingTarget { sessionId, videoId, selectedPlayerId or playerSeedBox }
+
+segment { startMs, endMs } carried forward unchanged
+
+4) Video Preview
+
+Purpose
+
+Verify tracking and effect rendering in real time before final processing.
+
+Expected functions
+
+Seek to startMs and warm up tracker.
+
+Reacquire subject using playerSeedBox, then lock to live track ID.
+
+Run one render loop tied to requestAnimationFrame.
+
+Apply letterbox-aware coordinate mapping.
+
+Show effect only when a valid bbox is available.
+
+Allow quick edits: change effect, reselect player, adjust segment.
+
+Critical data to pass
+
+previewPlan { sessionId, videoId, segment, effectConfig, subjectLock }
+
+subjectLock { liveTrackId or reacquisition strategy derived from playerSeedBox }
+
+renderTransform snapshot for Processing
+
+5) Processing
+
+Purpose
+
+Produce the final composite clip with the chosen effect tracking the subject.
+
+Expected functions
+
+Queue a GPU job.
+
+Replay the segment and composite effect frame by frame using tracker output.
+
+Encode to target container and bitrate.
+
+Emit status and error events.
+
+Critical data to pass
+
+renderJob { sessionId, videoId, segment, effectConfig, subjectLock, videoMeta }
+
+trackerParams used during Preview to ensure parity
+
+6) Export
+
+Purpose
+
+Deliver the finished highlight and persist a summary for analytics.
+
+Expected functions
+
+Final playback check.
+
+Download and share options.
+
+Store artifact and summary to the user account.
+
+Critical data produced
+
+outputAsset { url, sizeBytes, durationMs, resolution }
+
+renderSummary { effectType, params, trackingConfidence, renderTimeMs }
+
+Cross-stage rules and invariants
+
+Validation at stage entry
+
+Timeline requires videoMeta and sessionId.
+
+Effects requires segment and playerSeedBox or selectedPlayerId.
+
+Preview requires segment, effectConfig, and a valid subject reference.
+
+Processing requires a validated previewPlan.
+
+Coordinate contract
+
+All detection and tracking coordinates flow in normalized video space.
+
+Exactly one transform maps to the painted video rectangle in Preview and Processing.
+
+Session isolation
+
+All persisted keys are prefixed with sessionId and stage.
+
+New upload generates a new sessionId and clears prior stage state.
+
+Customer mode does not auto-hydrate selections across sessions.
+
+Subject identity
+
+Use playerSeedBox at startMs to reacquire the subject in Preview before adopting a live trackId.
+
+Do not assume track IDs from Timeline remain stable in Preview.
+
+Single render owner
+
+Exactly one RAF loop is active in Preview for a given session.
+
+All listeners and timers are disposed on stage exit.
+
+This is the minimal contract that keeps Klutch reliable from Upload through Export, prevents preselection leakage, and guarantees that the effect shown in Preview is the same one rendered in Processing.

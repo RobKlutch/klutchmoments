@@ -1,0 +1,77 @@
+# GPU-Optimized Dockerfile for Azure GPU instances
+FROM nvidia/cuda:12.1-devel-ubuntu22.04
+
+# Prevent interactive prompts during installation
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    libopencv-dev \
+    python3 \
+    python3-pip \
+    python3-dev \
+    curl \
+    wget \
+    software-properties-common \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 20
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+# Set working directory
+WORKDIR /app
+
+# Install Python dependencies with GPU acceleration
+COPY requirements-gpu-optimized.txt .
+RUN pip3 install --no-cache-dir --upgrade pip \
+    && pip3 install --no-cache-dir -r requirements-gpu-optimized.txt
+
+# Install Node.js dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy application files
+COPY server/ ./server/
+COPY shared/ ./shared/
+COPY yolo_worker.py ./
+COPY export_yolo11n.py ./
+
+# Download and setup YOLO11n model
+RUN python3 -c "
+try:
+    from ultralytics import YOLO
+    print('🔄 Downloading YOLO11n model...')
+    model = YOLO('yolo11n.pt')
+    print('✅ YOLO11n model downloaded')
+    # Export to ONNX with GPU optimization
+    model.export(format='onnx', dynamic=True, simplify=True, opset=17, imgsz=640)
+    print('✅ YOLO11n ONNX model exported')
+except Exception as e:
+    print(f'⚠️ Model setup failed: {e}')
+    print('Will use fallback detection')
+"
+
+# Copy the exported model
+RUN if [ -f yolo11n.onnx ]; then echo '✅ YOLO11n.onnx ready'; else echo '⚠️ Using fallback model'; fi
+
+# Create optimized startup script
+COPY gpu-startup.sh ./
+RUN chmod +x gpu-startup.sh
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Expose port
+EXPOSE 8000
+
+# Use optimized startup
+CMD ["./gpu-startup.sh"]

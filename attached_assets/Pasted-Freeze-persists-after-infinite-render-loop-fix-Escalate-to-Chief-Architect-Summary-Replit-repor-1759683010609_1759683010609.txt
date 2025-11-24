@@ -1,0 +1,62 @@
+Freeze persists after “infinite render loop” fix. Escalate to Chief Architect.
+
+Summary
+Replit reports the browser freeze was caused by an infinite rendering loop using stale values and null player data. The fix was deployed, but the issue still reproduces. The behavior is unchanged.
+
+Observed
+
+Video Preview still freezes and blocks progression.
+
+Tracking and highlight do not remain locked on the selected player.
+
+Occasional white crash screen after playback or on stage transition.
+
+Request
+Please escalate to the Chief Architect for a full front-to-back diagnosis and a corrective PR.
+
+What to verify and change
+
+Render loop controls
+
+Confirm loop guards check current state, not captured closures.
+
+Add prerequisite gating for selectedPlayer, detection_at_ms, and videoDims before any loop starts.
+
+Fix dependency arrays to prevent re-entrant renders.
+
+Concurrency and cleanup
+
+Add a requestId guard for all async paths; drop stale responses.
+
+Cancel streams and timers on unmount or stage change to avoid setState on unmounted components.
+
+Single tracking owner
+
+Ensure only Replicate YOLOv11 tracking runs in Video Preview.
+
+Remove internal trackers and fallback overlays.
+
+Bind the highlight to the live tracked box each frame, not to an initial snapshot.
+
+Event wiring and logging
+
+Verify handlePlayerSelect fires and stage transitions emit telemetry from the active runtime.
+
+Reduce verbose per-frame logs; retain only checkpoints needed for diagnosis.
+
+Acceptance criteria
+
+No freeze in Video Preview; smooth navigation to the next stage.
+
+Tracking starts at the Timeline selection timestamp and remains locked on the selected player throughout playback.
+
+No white crash screen after playback or on transition.
+
+Exactly one tracking pipeline active; logs show Replicate as the sole source.
+
+Workflow parity
+
+Admin: Upload → Timeline → Effects → Video Preview → Processing → Export (paywall bypassed).
+
+Customer: Upload → Timeline → Effects → Processing → Export (paywall enforced).
+Both flows must produce the same highlight clip result.

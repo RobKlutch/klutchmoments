@@ -1,0 +1,118 @@
+Excellent find. Duplicate SpotlightOverlay instances explain the “visible but frozen” spotlight perfectly. Your cleanup fix (clearing the SVG container on unmount) should stop stale overlays from stacking. Here’s how to lock this down and verify end-to-end.
+
+What to verify right now
+
+On mount: exactly one SpotlightOverlay element exists for the visible player.
+
+On player change/remount: the previous overlay is removed before the new one mounts.
+
+During playback: the overlay you see is the one whose render loop is incrementing the frame counter.
+
+Hardening changes to make permanent
+
+Single owner, single container
+
+Choose one component to own SpotlightOverlay (e.g., VideoPreviewSurface). Remove all other usages (VideoPreviewPlayer, VideoPreview.tsx) or guard them behind a feature flag so only one renders in Admin/Customer flows.
+
+Create a dedicated container under the video wrapper and enforce one child.
+
+function mountOverlay(container: HTMLElement, overlayEl: HTMLElement, overlayId: string) {
+  // remove any leftovers defensively
+  for (const n of [...container.children]) container.removeChild(n);
+  overlayEl.dataset.role = 'spotlight-overlay';
+  overlayEl.dataset.overlayId = overlayId;
+  container.appendChild(overlayEl);
+}
+
+
+Guaranteed cleanup on unmount
+
+On unmount: cancel rVFC/RAF, remove listeners, and clear the container’s children.
+
+return () => {
+  stopRenderLoop(video);
+  detachVideoListeners(video);
+  const c = getOverlayContainer(videoWrap);
+  while (c.firstChild) c.removeChild(c.firstChild);
+};
+
+
+Avoid key-churn remounts
+
+That key={${videoUrl}-${start}-${playerId}} pattern will remount the subtree on every change, inviting duplicates if cleanup ever fails.
+
+Prefer stable keys and internal effects to respond to playerId/segment changes. Only remount on true media source change.
+
+Callback ref for the real <video>
+
+Keep the callback ref approach so listeners attach to the actual element instance when it mounts, and detach when it unmounts. Do not rely on [videoRef.current] in deps.
+
+Tie HUD and overlay to the same instance
+
+Write overlayId, videoSrc, loopBackend, rAFStarted, and aRAFFrameCount from the same overlay instance that performs the rendering.
+
+On frame: increment aRAFFrameCount inside the callback. If the visible overlay isn’t the one incrementing, you still have a duplicate.
+
+Source of truth for tracking position
+
+Read bbox from a ref updated each frame (not React state).
+
+Render from that ref every frame. No equality guards that can freeze small movements.
+
+Absolute timebase only
+
+Continue using meta.mediaTime * 1000 for lookups. Keep a small tolerance (e.g., 40 ms).
+
+Development-time guardrails
+
+DOM census assert (runs in dev builds):
+
+const overlays = document.querySelectorAll('[data-role="spotlight-overlay"]');
+if (process.env.NODE_ENV !== 'production') {
+  console.assert(overlays.length <= 1, 'Multiple spotlight overlays detected', overlays);
+}
+
+
+Watchdog: if video is playing and aRAFFrameCount stays at 0 for 300 ms, call startRenderLoop(video) again.
+
+Console breadcrumbs:
+
+[Overlay <id>] MOUNT
+
+[Overlay <id>] startRenderLoop { backend, src }
+
+[Overlay <id>] rVFC fired
+
+[Overlay <id>] UNMOUNT — clearing container
+
+Quick acceptance test
+
+Hard refresh. Navigate to Video Preview.
+
+In Elements panel, query [data-role="spotlight-overlay"] → returns 1.
+
+Press Play.
+
+HUD: rAFStarted: YES, rAFFrameCount increases every frame.
+
+Spotlight tracks the selected player.
+
+Change selected player (forces previous overlay to unmount).
+
+Console shows unmount cleanup log before new mount log.
+
+DOM census remains 1. Spotlight tracks new player.
+
+Resize the window.
+
+HUD shows canvas ≈ contentRect × devicePixelRatio. Alignment holds.
+
+If anything regresses
+
+If tracking moves but spotlight is static: verify the overlay you see has the same overlayId as the one logging rVFC frames.
+
+If spotlight misaligns: confirm the overlay surface equals the painted video rect and you perform a single normalized→painted transform.
+
+If the loop stops: ensure only play/seeked start the loop and only pause/ended/unmount stop it. Never stop inside the frame callback.
+
+With duplicate instances removed, guaranteed cleanup, and a single owner for SpotlightOverlay, the spotlight will stick to the selected player reliably.

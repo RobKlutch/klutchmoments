@@ -1,0 +1,196 @@
+the required data flow, and the specific fixes to restore the spotlight on the selected player in Video Preview.
+
+Klutch Critical Clarification and Required Fix
+1) Product intent
+
+The core outcome of Klutch is a visible spotlight effect that follows the user-selected player through the chosen clip. Everything else in the workflow exists to make this possible.
+
+The spotlight effect must be the exact effect chosen in the Effects stage.
+
+That effect must be applied in Video Preview on the selected player only.
+
+The preview is the proof that our end result in Processing will be correct.
+
+2) Non-negotiable data flow
+
+Effects chosen in Effects must be passed into Video Preview without mutation or fallback.
+
+Golden thread
+
+Timeline selects the player and timestamp window.
+
+Effects defines the effect type and parameters.
+
+Video Preview renders that exact effect on that exact player. No defaults. No substitutions.
+
+3) Stage contracts that must be enforced
+Timeline → Effects
+
+Output required:
+
+type TimelineOut = {
+  sessionId: string
+  videoId: string
+  segment: { startMs: number; endMs: number }
+  // Seed box at startMs in normalized video space, center-based
+  playerSeedBox: { cx: number; cy: number; w: number; h: number }
+  // Optional if IDs are stable. Do not rely on this across stages.
+  selectedPlayerId?: string
+}
+
+Effects → Video Preview
+
+Output required:
+
+type EffectConfig = {
+  type: 'spotlight' | 'disk' | 'ring' | string
+  radius: number
+  intensity: number
+  color: string
+  opacity: number
+  durationMs: number
+  // Any renderer-specific options
+  options?: Record<string, any>
+}
+
+type PreviewIn = TimelineOut & {
+  effectConfig: EffectConfig
+}
+
+
+Validation at Preview entry must block if any field is missing or invalid.
+
+4) Timeline selection handler must fire
+
+You reported that the click event fires but handlePlayerSelect does not. This breaks the golden thread at the source.
+
+Required corrective actions:
+
+Bind a direct handler to each bbox element. Avoid brittle delegation.
+
+Use onPointerUp to avoid conflicts with drag.
+
+Stop propagation within the bbox handler.
+
+Verify the required logs appear on every click.
+
+Reference:
+
+<button
+  type="button"
+  className="bbox"
+  data-player-id={box.id}
+  onPointerUp={(e) => { e.stopPropagation(); handlePlayerSelect(box); }}
+/>
+
+
+Handler must produce these logs on every selection:
+
+handlePlayerSelect CALLED
+
+handlePlayerSelect: playerWithId created
+
+SANITIZED PLAYER for workflow state
+
+If these do not appear, the selection state will not exist and no spotlight can render later.
+
+5) Video Preview visibility gating
+
+No effect should render until we have a valid bbox for the selected subject at or after startMs.
+
+Required sequence:
+
+Seek to startMs.
+
+Wait for canplay.
+
+Warm up tracker.
+
+Reacquire subject using playerSeedBox for the first few frames. Adopt the live track ID only after reacquisition.
+
+Start one requestAnimationFrame loop.
+
+Show the effect only once bbox is non-null and has positive width and height.
+
+Minimal loop:
+
+function tick() {
+  const t = video.currentTimeMs();
+  const inWindow = t >= segment.startMs && t <= segment.endMs;
+  if (!inWindow) { overlay.hide(); return raf(tick); }
+
+  const bbox = tracker.getBBox(subjectId, t);
+  const hasBBox = bbox && bbox.w > 0 && bbox.h > 0;
+  if (!hasBBox) { overlay.hide(); return raf(tick); }
+
+  const vRect = getPaintedVideoRect(videoEl); // letterbox compensated
+  const rect = normCenterToTopLeftAbsolute(bbox, vRect); // one transform only
+
+  overlay.show();
+  overlay.render(effectConfig, rect);
+  raf(tick);
+}
+
+6) Single source of truth for the effect
+
+Preview must use effectConfig from PreviewIn as the only source of truth.
+
+Remove any code that silently swaps to a default effect or normalizes to zero values.
+
+Log the effect at the first RAF tick to prove fidelity.
+
+One-time log:
+
+console.info('[Preview:first-raf:effectConfig]', JSON.stringify(effectConfig));
+
+7) Coordinate integrity
+
+All detection and tracking are in normalized video coordinates.
+
+Exactly one transform maps to the painted video rectangle.
+
+Do not apply letterbox compensation twice.
+
+Ensure overlay z-index is above the video and pointer events are correct.
+
+8) Session isolation and no preselection
+
+A new upload must create a new sessionId.
+
+Timeline must mount with no player selected. The user must run Detect and click a bbox.
+
+Do not auto-hydrate selectedPlayerId in Customer mode.
+
+All persisted keys must be prefixed with klutch:{sessionId}:{stage}:....
+
+9) Instrumentation that must be visible during a successful run
+
+[Timeline] handlePlayerSelect CALLED
+
+[Timeline] SANITIZED PLAYER for workflow state
+
+[Preview] validatePreviewInput OK
+
+[Preview:first-raf:effectConfig] ...
+
+[Preview] bbox logs that show non-zero width and height at or after startMs
+
+[Preview] overlay visible=true
+
+If any of these are missing, identify the broken leg and fix that leg instead of adding workarounds.
+
+10) Acceptance criteria for this fix
+
+Clicking any bbox in Timeline reliably produces the three handler logs and sets playerSeedBox.
+
+Entering Preview with a valid PreviewIn payload results in the spotlight that matches effectConfig appearing on the selected player once the first valid bbox is available.
+
+The overlay follows the player through the segment with correct alignment across aspect ratios.
+
+Resizing the window does not hide or misalign the effect.
+
+There is only one RAF loop active during Preview.
+
+Starting a new highlight shows no preselected player.
+
+Please confirm that the team has implemented the handler binding, the Preview input validation, the single effect source of truth, and the visibility gate based on a valid bbox at or after startMs. These four items are the minimal path to restore the spotlight on the selected player in Video Preview.

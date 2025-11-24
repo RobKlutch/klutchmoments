@@ -1,0 +1,122 @@
+1. What the logs actually show
+
+Key findings from #7.rtf:
+
+Backend emits correct bounding boxes (centerX/centerY are consistent).
+
+Frontend receives boxes with small temporal gaps (Δt ≈ 33–66 ms) but then occasionally skips 100–150 ms, triggering “STALE FRAME REJECTED” or “TIMEBASE REGRESSION”.
+
+The rVFC (requestVideoFrameCallback) loop is running continuously, but each frame uses the previous timestamp (not the live video.currentTime).
+
+HighlightLock.update() sometimes receives epoch timestamps (17xxxxxxxxxxxx) instead of video-relative milliseconds (5900–6200 ms).
+This mix causes the predictor to momentarily lose its temporal context.
+
+The overlay renders using fallback values at those mismatched frames:
+
+⚠️ DEFENSIVE FALLBACK: Calculated centerX/centerY from topLeft
+
+
+which explains the visible jump or drift.
+
+Conclusion:
+The spotlight isn’t freezing anymore; it’s desynchronized. The jitter comes from the frontend re-using stale or mismatched time values.
+
+2. Root causes
+Symptom	Root cause
+Spotlight “teleports” slightly	sampleTime ≠ video.currentTime in rVFC loop
+Spotlight skips frames / jitter	HighlightLock.update() mixes epoch ms and video ms
+Occasional snap to wrong player	stable_getBoxAtTime falls back to previous frame when Δ > 100 ms
+Defensive fallback renders	Missing centerX/centerY because predictor’s last box was rejected
+3. Targeted corrections
+A. Synchronize tracking time
+
+In useSpotlightTracker.ts (where you call getBoxByIdAtTime):
+
+// BAD: sampleTime may be reused from previous frame
+// const sampleTime = lastDetectionTime;
+
+// GOOD:
+const sampleTime = Number(video.currentTime.toFixed(3)); // live time in seconds
+const box = getBoxByIdAtTime(selectedId, sampleTime);
+
+
+Never reuse detectionTime as the render-time anchor during playback.
+
+B. Normalize time units before updating HighlightLock
+
+In HighlightLock.update() remove any fallback to Date.now():
+
+// inside HighlightLock.update()
+if (!timestampMs || isNaN(timestampMs)) return; // ignore invalid
+// assume always video time in ms
+this.lastDetectionTime = timestampMs;
+
+
+At every call site:
+
+highlightLock.update(Math.round(video.currentTime * 1000));
+
+
+This keeps prediction continuity and prevents 17-digit epoch jumps.
+
+C. Replace “stale frame” rejection with tolerance window
+
+In useSpotlightTracker.ts:
+
+const tolerance = 0.150; // 150 ms
+const delta = Math.abs(video.currentTime - sampleTime);
+if (delta > tolerance && video.currentTime > 0) {
+  // instead of reject, snap to current
+  sampleTime = video.currentTime;
+}
+
+
+This prevents gaps caused by minor frame latency.
+
+D. Smoothing filter for overlay position
+
+In SpotlightOverlay.tsx, add a simple exponential smoother so micro jitter doesn’t render as visible jumps:
+
+// track previous render position
+const [smoothPos, setSmoothPos] = useState<{x:number, y:number}>({x:0,y:0});
+const alpha = 0.25; // smoothing factor 0–1
+
+useEffect(() => {
+  if (!box) return;
+  setSmoothPos(prev => ({
+    x: prev.x + alpha * (box.centerX - prev.x),
+    y: prev.y + alpha * (box.centerY - prev.y),
+  }));
+}, [box?.centerX, box?.centerY]);
+
+
+Render the spotlight using smoothPos.
+
+4. Verification steps after patch
+
+Log these per-frame values:
+
+[track] ct=5.933 sample=5.933 center=(420,218) src=backend
+
+
+Confirm ct and sample always match within ± 0.02 s.
+
+Ensure no epoch times appear in HighlightLock logs.
+
+Observe that DEFENSIVE FALLBACK messages disappear.
+
+Visual check: the spotlight should now glide precisely with the player without snapback or drift.
+
+5. If jitter persists
+
+If after this patch the overlay still oscillates slightly:
+
+Add a frame interpolation step in stable_getBoxAtTime.ts:
+
+// Linear interpolate missing frame boxes
+const t = (targetTime - prev.t) / (next.t - prev.t);
+box.centerX = prev.centerX + t * (next.centerX - prev.centerX);
+box.centerY = prev.centerY + t * (next.centerY - prev.centerY);
+
+
+Ensure backend emits monotonically increasing frame times in seconds.

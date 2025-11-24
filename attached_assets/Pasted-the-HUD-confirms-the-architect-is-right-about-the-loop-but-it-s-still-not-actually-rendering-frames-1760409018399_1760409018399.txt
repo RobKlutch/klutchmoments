@@ -1,0 +1,163 @@
+the HUD confirms the architect is right about the loop, but it’s still not actually rendering frames.
+
+Key observations from your screenshot
+
+aRAFStarted: YES, aRAFFrameCount: 0. The loop is “armed” but the callback never runs or never re-arms.
+
+Tracking is valid: hasValidBoxForSelected: YES, ID Match: YES, boxTimestamp == sampleTime.
+
+Activation is satisfied: selectedActivationTime < currentVideoTime and isSpotlightActive: YES.
+
+Canvas still mismatched to the painted video area: contentRect 734×412.875 vs canvas 848×480. Even when the loop runs, this will misalign the overlay.
+
+What this means
+
+You’re setting the “started” flag, but either:
+
+requestVideoFrameCallback isn’t being scheduled correctly, or it isn’t re-arming inside the callback, or
+
+an exception inside the callback returns before incrementing the frame counter and before re-arming, or
+
+you’re toggling RAF/rVFC flags without actually driving renderAtTime().
+
+High-confidence fixes
+
+Make the render loop self-rearming and exception-safe
+Use rVFC when available, else RAF. Re-arm only inside the callback. Increment the HUD counter after a successful render.
+
+class RenderLoop {
+  private rvfcId: number | null = null;
+  private rafId: number | null = null;
+  private running = false;
+
+  start() {
+    if (this.running) return;
+    this.running = true;
+
+    const useRVFC = typeof (video as any).requestVideoFrameCallback === 'function';
+    hud.set('loopBackend', useRVFC ? 'rVFC' : 'RAF');
+
+    if (useRVFC) {
+      const step = (_now: number, meta: VideoFrameCallbackMetadata) => {
+        try {
+          const tAbsMs = Math.round(meta.mediaTime * 1000);
+          renderAtAbsTime(tAbsMs);            // your gating + draw
+          hud.inc('aRAFFrameCount');          // prove frames are rendered
+        } catch (e: any) {
+          hud.set('lastRenderError', String(e?.message || e));
+        } finally {
+          if (this.running) this.rvfcId = video.requestVideoFrameCallback(step);
+        }
+      };
+      this.rvfcId = video.requestVideoFrameCallback(step);
+    } else {
+      const tick = () => {
+        try {
+          const tAbsMs = clipStartOffsetMs + Math.round(video.currentTime * 1000);
+          renderAtAbsTime(tAbsMs);
+          hud.inc('aRAFFrameCount');
+        } catch (e: any) {
+          hud.set('lastRenderError', String(e?.message || e));
+        } finally {
+          if (this.running) this.rafId = requestAnimationFrame(tick);
+        }
+      };
+      this.rafId = requestAnimationFrame(tick);
+    }
+
+    hud.set('aRAFStarted', 'YES');
+  }
+
+  stop() {
+    this.running = false;
+    if (this.rvfcId) { (video as any).cancelVideoFrameCallback(this.rvfcId); this.rvfcId = null; }
+    if (this.rafId) { cancelAnimationFrame(this.rafId); this.rafId = null; }
+  }
+}
+
+
+Wire it once:
+
+const loop = new RenderLoop();
+video.addEventListener('play',   () => loop.start());
+video.addEventListener('seeked', () => loop.start());
+video.addEventListener('pause',  () => loop.stop());
+video.addEventListener('ended',  () => loop.stop());
+
+// Also start immediately if we enter Preview while already playing & ready
+if (!video.paused && video.readyState >= 2) loop.start();
+
+
+Ensure renderAtAbsTime never early-returns before re-arming
+Keep gating inside renderAtAbsTime, but do not stop the loop there. Return quickly, but let the loop continue. Increment the frame counter even on “no-draw” frames to prove the callback is executing.
+
+function renderAtAbsTime(tAbsMs: number) {
+  const tClipMs = tAbsMs - clipStartOffsetMs;
+  const inWindow = tClipMs >= segment.startMs && tClipMs <= segment.endMs;
+
+  if (!inWindow) { overlay.hide(); hud.inc('aRAFFrameCount'); return; }
+
+  const bbox = tracker.getBoxByIdAtTime(trackId, tAbsMs, { toleranceMs: 40 });
+  if (!bbox || bbox.w <= 0 || bbox.h <= 0) { overlay.hide(); hud.inc('aRAFFrameCount'); return; }
+
+  const vRect = getPaintedVideoRect(videoEl);
+  const rect  = normCenterToTopLeftAbsolute(bbox, vRect);
+  overlay.show();
+  overlay.render(effectConfig, rect);
+  hud.inc('aRAFFrameCount');
+}
+
+
+Fix the canvas–contentRect mismatch
+Size the overlay surface to the painted video rectangle, not the intrinsic video size.
+
+function sizeCanvasToContent() {
+  const r = getPaintedVideoRect(videoEl);      // e.g., 734×412.875
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.style.width  = `${r.width}px`;
+  canvas.style.height = `${r.height}px`;
+  canvas.width  = Math.max(1, Math.round(r.width  * dpr));
+  canvas.height = Math.max(1, Math.round(r.height * dpr));
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  hud.set('contentRect', `${r.width}×${r.height}`);
+  hud.set('canvas', `${canvas.width}×${canvas.height}`);
+}
+
+
+Call this on Preview init and on resize; the HUD should then show canvas ≈ contentRect × dpr.
+
+Add two sanity HUD fields to prove progress
+
+loopBackend: rVFC or RAF
+
+lastRenderError: message or empty
+
+One more guard that commonly causes “0 frames”
+If you checked rVFC capability using the prototype, switch to checking the instance. Some environments shim the method on the element, not the prototype.
+
+const useRVFC = typeof (video as any).requestVideoFrameCallback === 'function';
+
+
+Verify timebase alignment remains absolute
+You already fixed storage vs lookup, but keep the HUD fields:
+
+absQueryTime = clipStartOffset + sampleTime
+
+boxTimestamp
+
+absDelta = |boxTimestamp − absQueryTime| in ms
+AbsDelta should stay within your tolerance.
+
+Acceptance check after these changes
+
+aRAFStarted: YES and aRAFFrameCount increases while playing.
+
+Spotlight visibly tracks the selected player.
+
+Canvas and contentRect alignment holds through resize.
+
+No lastRenderError churn in HUD.
+
+If aRAFFrameCount stays at 0 after this, the callback is not firing at all. In that case, log at the very top of the callback before any logic, and verify the event listeners fire on play/seeked.

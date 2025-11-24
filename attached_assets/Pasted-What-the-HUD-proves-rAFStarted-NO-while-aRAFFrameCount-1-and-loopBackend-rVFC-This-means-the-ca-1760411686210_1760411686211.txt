@@ -1,0 +1,198 @@
+What the HUD proves
+
+rAFStarted: NO while aRAFFrameCount: 1 and loopBackend: rVFC.
+This means the callback is firing at least once, but the “started” flag is not being set for the overlay instance you are viewing, or it is being reset by another instance. This is an instance-scoping bug, not a tracking issue.
+
+Tracking and gating are good: hasValidBoxForSelected: YES, ID Match: YES, selectedActivationTime < currentVideoTime, final isSpotlightActive: YES.
+
+Surface mismatch persists: contentRect 734×412.875 vs canvas 848×480. Even when the loop runs, this will misalign the overlay.
+
+Likely root causes
+
+Instance mix-up: rAFStarted is stored in a different store/instance than the overlay rendering. A second overlay or a stale store is resetting it to NO.
+
+Flag set timing: The code sets rAFStarted outside the callback scheduling branch or after a failing precondition. The first callback increments the frame count, but the flag never flips to YES.
+
+Listener scope: Event listeners are bound to a different <video> than the one in view. rVFC fires on one element, HUD reflects another.
+
+Canvas sizing: The overlay canvas is not sized to the painted video rectangle; alignment will appear wrong even if frames render.
+
+Minimal, targeted patch
+A) Per-instance loop manager with truthful HUD
+
+Scope HUD writes to the overlay instance. Flip rAFStarted at the moment you successfully schedule the first callback. Re-arm only inside the callback.
+
+// SpotlightOverlay.tsx
+const overlayId = useMemo(() => crypto.randomUUID().slice(0, 8), []);
+hud.set('overlayId', overlayId);
+
+function startRenderLoop(video: HTMLVideoElement) {
+  if (state.running) return;
+
+  const useRVFC = typeof (video as any).requestVideoFrameCallback === 'function';
+  hud.set('loopBackend', useRVFC ? 'rVFC' : 'RAF');
+
+  state.running = true;
+
+  if (useRVFC) {
+    const step = (_now: number, meta: VideoFrameCallbackMetadata) => {
+      try {
+        const tAbsMs = Math.round(meta.mediaTime * 1000);
+        renderAtAbsTime(tAbsMs);                         // draw or hide; do not stop loop
+      } catch (e: any) {
+        hud.set('lastRenderError', String(e?.message || e));
+      } finally {
+        hud.inc('aRAFFrameCount');                       // prove callback executed
+        if (state.running) state.rvfcId = (video as any).requestVideoFrameCallback(step);
+      }
+    };
+    state.rvfcId = (video as any).requestVideoFrameCallback(step);
+  } else {
+    const tick = () => {
+      try {
+        const tAbsMs = clipStartOffsetMs + Math.round(video.currentTime * 1000);
+        renderAtAbsTime(tAbsMs);
+      } catch (e: any) {
+        hud.set('lastRenderError', String(e?.message || e));
+      } finally {
+        hud.inc('aRAFFrameCount');
+        if (state.running) state.rafId = requestAnimationFrame(tick);
+      }
+    };
+    state.rafId = requestAnimationFrame(tick);
+  }
+
+  hud.set('rAFStarted', 'YES');                          // set when successfully scheduled
+}
+
+function stopRenderLoop(video?: HTMLVideoElement) {
+  state.running = false;
+  if (state.rvfcId && video) { (video as any).cancelVideoFrameCallback(state.rvfcId); }
+  if (state.rafId) cancelAnimationFrame(state.rafId);
+  state.rvfcId = null; state.rafId = null;
+}
+
+B) Bind to the exact displayed <video> and start reliably
+
+Add listeners to the same videoEl ref that the user sees.
+
+Start on play and seeked. Also start immediately if the video is already playing and ready on mount.
+
+useEffect(() => {
+  const v = videoRef.current;
+  if (!v) return;
+
+  hud.set('videoSrc', v.currentSrc || '(none)');
+  hud.set('videoReadyState', String(v.readyState));
+
+  const onPlay   = () => startRenderLoop(v);
+  const onSeeked = () => startRenderLoop(v);
+  const onPause  = () => stopRenderLoop(v);
+  const onEnded  = () => stopRenderLoop(v);
+
+  v.addEventListener('play', onPlay);
+  v.addEventListener('seeked', onSeeked);
+  v.addEventListener('pause', onPause);
+  v.addEventListener('ended', onEnded);
+
+  // If user enters Preview while already playing and ready
+  if (!v.paused && v.readyState >= 2) startRenderLoop(v);
+
+  return () => {
+    v.removeEventListener('play', onPlay);
+    v.removeEventListener('seeked', onSeeked);
+    v.removeEventListener('pause', onPause);
+    v.removeEventListener('ended', onEnded);
+    stopRenderLoop(v);
+  };
+}, [videoRef.current]); // rebind if the element instance changes
+
+C) Keep rendering lightweight, time-correct, and never stop the loop
+
+Absolute timebase for lookups.
+
+Gate visibility, but never stop the loop in renderAtAbsTime.
+
+function renderAtAbsTime(tAbsMs: number) {
+  const tClipMs = tAbsMs - clipStartOffsetMs;
+  const within = tClipMs >= segment.startMs && tClipMs <= segment.endMs;
+
+  if (!within) { overlay.hide(); return; }
+
+  const bbox = tracker.getBoxByIdAtTime(trackId, tAbsMs, { toleranceMs: 40 });
+  if (!bbox || bbox.w <= 0 || bbox.h <= 0) { overlay.hide(); return; }
+
+  const vRect = getPaintedVideoRect(videoRef.current!);
+  const rect  = normCenterToTopLeftAbsolute(bbox, vRect);
+
+  overlay.show();
+  overlay.render(effectConfig, rect);
+}
+
+D) Fix canvas sizing to match the painted video rectangle
+
+The HUD must show canvas ≈ contentRect × dpr.
+
+function sizeCanvasToContent() {
+  const v = videoRef.current!;
+  const r = getPaintedVideoRect(v);                   // letterbox compensated CSS rect
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.style.width  = `${r.width}px`;
+  canvas.style.height = `${r.height}px`;
+  canvas.width  = Math.max(1, Math.round(r.width  * dpr));
+  canvas.height = Math.max(1, Math.round(r.height * dpr));
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  hud.set('contentRect', `${r.width}×${r.height}`);
+  hud.set('canvas', `${canvas.width}×${canvas.height}`);
+}
+useLayoutEffect(sizeCanvasToContent, []);
+useEffect(() => {
+  const onResize = () => sizeCanvasToContent();
+  window.addEventListener('resize', onResize);
+  return () => window.removeEventListener('resize', onResize);
+}, []);
+
+E) Add two assertions to catch remaining wiring bugs
+
+Assert HUD overlayId matches the instance that started the loop.
+
+Assert listeners are attached to the same videoEl as the on-screen element.
+
+hud.set('overlayId', overlayId);
+console.info('[Overlay] start', { overlayId, videoSrc: videoRef.current?.currentSrc });
+
+invariant(hud.get('overlayId') === overlayId, 'HUD instance mismatch');
+invariant(videoRef.current === getDisplayedVideoElement(), 'Loop bound to wrong video element');
+
+Acceptance criteria to validate after patch
+
+HUD shows overlayId and the same ID appears in console on mount/start.
+
+HUD shows rAFStarted: YES and aRAFFrameCount increments every frame while playing.
+
+HUD shows videoSrc equal to the visible video’s currentSrc.
+
+HUD shows canvas equals contentRect × dpr.
+
+Spotlight appears at or after selectedActivationTime and tracks the selected player to endMs.
+
+Quick test script
+
+Hard refresh. Enter Preview.
+
+With video paused at startMs and bbox available, effect is visible.
+
+Press Play. Confirm rAFStarted: YES, aRAFFrameCount increments, and spotlight tracks.
+
+Resize window. Canvas resizes to contentRect × dpr and alignment holds.
+
+Seek back before activation. Effect hides. Seek forward. Effect reappears and tracks.
+
+If aRAFFrameCount still does not increment while playing, the loop is bound to the wrong videoEl or HUD store. In that case, print at the very top of the rVFC callback:
+
+console.info('[Overlay] rVFC fired', overlayId);
+
+
+If this prints and HUD does not increment, the HUD writes are not scoped to this overlay instance. Scope them via props/context rather than a global singleton.

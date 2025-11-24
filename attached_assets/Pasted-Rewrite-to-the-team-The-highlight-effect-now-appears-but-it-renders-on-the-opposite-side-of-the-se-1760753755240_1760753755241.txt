@@ -1,0 +1,77 @@
+Rewrite to the team
+
+The highlight effect now appears, but it renders on the opposite side of the selected player, then floats and attempts to attach to different objects.
+
+Shortly after, the preview goes to a white crash screen.
+
+This continues to occur despite recent fixes. Please address root cause, not symptoms.
+
+Tracking policy and rendering
+
+Keep global tracking enabled for stability and re-acquisition.
+
+Render and log only the selected player by default.
+
+Never attach the spotlight to non-selected tracks unless explicitly configured.
+
+If the selected player is lost, use global tracks to re-acquire within 0.5 s, then resume render_only_selected mode.
+
+Recommended configuration
+
+Mode: global tracking on, render_only_selected = true, log_only_selected = true.
+
+Bind by persistent track ID, not index.
+
+Max concurrent tracks: 8–12.
+
+Detector confidence: high; tracker FPS: 15–20.
+
+ROI expand on loss: enabled.
+
+Non-selected boxes hidden by default, togglable for debugging.
+
+Likely root causes to investigate
+
+Tracker ID mismatch. selectedPlayerId is not mapped to the persistent tracking ID from YOLOv11.
+
+Coordinate transform error. Letterboxing or scaling is not applied consistently, causing X or Y inversion or offset.
+
+Competing overlays. Multiple overlay instances bind to different targets and fight for control.
+
+Stale or racing state. Effect config or bbox cache is read before tracker init, then never refreshed.
+
+Log flood and RAF loop. Excess console logging or uncontrolled requestAnimationFrame updates freeze the UI and trigger the white screen.
+
+Immediate actions
+
+Bind by persistent track ID only. Do not bind by array index or last-seen order.
+
+Centralize coordinates. Use a single transform utility for bbox to canvas that accounts for aspect ratio, padding, and device pixel ratio.
+
+Enforce a single overlay instance. Guard against duplicate mounts and clean up on unmount.
+
+Gate rendering on readiness. Wait for tracker-ready and the selectedPlayerId map to resolve before first paint.
+
+Throttle logs and RAF. Cap logs to a rolling buffer and ensure only one RAF loop drives overlay updates.
+
+Diagnostics to capture on next run
+
+Selected player ID, mapped track ID, and first valid detection time.
+
+Raw and transformed bbox for the selected player at activation and 1 second after.
+
+Overlay instance count and mount and unmount events.
+
+Frame time, RAF tick count, and log line count over time.
+
+Error boundary output and stack trace at crash.
+
+Acceptance criteria
+
+On Play, the effect renders on the selected player and stays locked throughout playback.
+
+No floating or bouncing to other players during the clip.
+
+No white screen after playback. UI remains responsive.
+
+Logs are visible and capped. No freeze from logging or RAF loops.

@@ -1,0 +1,42 @@
+# Dockerfile for Backend API Only (GPU-enabled)
+FROM python:3.11-slim
+
+# Install system dependencies for OpenCV and GPU support
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    libopencv-dev \
+    python3-dev \
+    curl \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js for hybrid backend
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+WORKDIR /app
+
+# Copy and install Python dependencies (including GPU support)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy and install Node.js dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy backend source code only
+COPY server/ ./server/
+COPY shared/ ./shared/
+COPY yolo_worker.py ./
+COPY export_yolo11n.py ./
+
+# Copy YOLO11n model if available
+COPY yolo11n.onnx ./yolo11n.onnx
+
+# Expose API port
+EXPOSE 8000
+
+# Start only the backend API server
+CMD ["node", "server/index.js"]

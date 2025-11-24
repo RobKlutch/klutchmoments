@@ -1,0 +1,176 @@
+Your HUD shows tracking is valid, activation time is satisfied, and the overlay surface is now sized correctly. The blocker is still the render loop not actually running on the on-screen overlay:
+
+rAFStarted: NO
+
+rAFFrameCount: 0
+
+ID Match: YES, hasValidBoxForSelected: YES, final isSpotlightActive: YES
+
+This is almost always an instance/lifecycle issue: listeners are not attached to the live <video> element, or the loop is never scheduled for the mounted overlay.
+
+Below is a targeted, minimal patch that makes the loop start reliably and keeps it alive. Hand this to Replit.
+
+1) Use a callback ref to bind to the real <video> instance
+
+Do not depend on videoRef.current changing in a useEffect array. Use a callback ref so you can attach/detach listeners exactly when the element mounts/unmounts.
+
+function SpotlightOverlay(props) {
+  const overlayId = useMemo(() => crypto.randomUUID().slice(0, 8), []);
+  const videoElRef = useRef<HTMLVideoElement | null>(null);
+  const loopRef = useRef<{ running: boolean; rvfcId: number | null; rafId: number | null }>({ running:false, rvfcId:null, rafId:null });
+
+  const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
+    // Detach from old
+    if (videoElRef.current) detachVideoListeners(videoElRef.current);
+    videoElRef.current = node;
+    // Attach to new
+    if (node) attachVideoListeners(node);
+  }, []);
+
+  return (
+    <>
+      {/* pass setVideoRef to the actual player component */}
+      <VideoPlayer ref={setVideoRef} /* ... */ />
+      {/* overlay canvas/svg here */}
+    </>
+  );
+}
+
+2) Attach a single, definitive set of listeners and start the loop from them
+
+Bind to play and seeked. Stop on pause and ended. Also start once after canplay if the video is already playing.
+
+function attachVideoListeners(video: HTMLVideoElement) {
+  const onPlay = () => startRenderLoop(video);
+  const onSeeked = () => startRenderLoop(video);
+  const onPause = () => stopRenderLoop(video);
+  const onEnded = () => stopRenderLoop(video);
+  const onCanPlay = () => { if (!video.paused) startRenderLoop(video); };
+
+  video.addEventListener('play', onPlay);
+  video.addEventListener('seeked', onSeeked);
+  video.addEventListener('pause', onPause);
+  video.addEventListener('ended', onEnded);
+  video.addEventListener('canplay', onCanPlay);
+
+  // Keep for detach
+  (video as any).__klutchHandlers = { onPlay, onSeeked, onPause, onEnded, onCanPlay };
+  hud.set('videoSrc', video.currentSrc || '(none)');
+}
+
+function detachVideoListeners(video: HTMLVideoElement) {
+  const h = (video as any).__klutchHandlers;
+  if (!h) return;
+  video.removeEventListener('play', h.onPlay);
+  video.removeEventListener('seeked', h.onSeeked);
+  video.removeEventListener('pause', h.onPause);
+  video.removeEventListener('ended', h.onEnded);
+  video.removeEventListener('canplay', h.onCanPlay);
+  (video as any).__klutchHandlers = undefined;
+  stopRenderLoop(video);
+}
+
+3) Self-rearming render loop with truthful HUD
+
+Flip rAFStarted the moment you successfully schedule the first callback. Always re-arm inside the callback. Increment the frame counter even on “no-draw” frames.
+
+function startRenderLoop(video: HTMLVideoElement) {
+  const loop = loopRef.current;
+  if (loop.running) return;
+  loop.running = true;
+
+  const useRVFC = typeof (video as any).requestVideoFrameCallback === 'function';
+  hud.set('loopBackend', useRVFC ? 'rVFC' : 'RAF');
+
+  if (useRVFC) {
+    const step = (_now: number, meta: VideoFrameCallbackMetadata) => {
+      try {
+        const tAbsMs = Math.round(meta.mediaTime * 1000);
+        renderAtAbsTime(tAbsMs, video);
+      } catch (e: any) {
+        hud.set('lastRenderError', String(e?.message || e));
+      } finally {
+        hud.inc('aRAFFrameCount');
+        if (loop.running) loop.rvfcId = (video as any).requestVideoFrameCallback(step);
+      }
+    };
+    loop.rvfcId = (video as any).requestVideoFrameCallback(step);
+  } else {
+    const tick = () => {
+      try {
+        const tAbsMs = clipStartOffsetMs + Math.round(video.currentTime * 1000);
+        renderAtAbsTime(tAbsMs, video);
+      } catch (e: any) {
+        hud.set('lastRenderError', String(e?.message || e));
+      } finally {
+        hud.inc('aRAFFrameCount');
+        if (loop.running) loop.rafId = requestAnimationFrame(tick);
+      }
+    };
+    loop.rafId = requestAnimationFrame(tick);
+  }
+  hud.set('rAFStarted', 'YES');
+}
+
+function stopRenderLoop(video?: HTMLVideoElement) {
+  const loop = loopRef.current;
+  loop.running = false;
+  if (loop.rvfcId && video) { (video as any).cancelVideoFrameCallback(loop.rvfcId); }
+  if (loop.rafId) cancelAnimationFrame(loop.rafId);
+  loop.rvfcId = null; loop.rafId = null;
+}
+
+4) Rendering: absolute timebase, gating, single transform, no loop stop
+function renderAtAbsTime(tAbsMs: number, video: HTMLVideoElement) {
+  const tClip = tAbsMs - clipStartOffsetMs;
+  const within = tClip >= segment.startMs && tClip <= segment.endMs;
+  if (!within) { overlay.hide(); return; }
+
+  const bbox = tracker.getBoxByIdAtTime(trackId, tAbsMs, { toleranceMs: 40 });
+  if (!bbox || bbox.w <= 0 || bbox.h <= 0) { overlay.hide(); return; }
+
+  const r = getPaintedVideoRect(video);       // letterbox compensated rect in CSS px
+  const rect = normCenterToTopLeftAbsolute(bbox, r); // one transform only
+  overlay.show();
+  overlay.render(effectConfig, rect);
+}
+
+5) Safety watchdog to recover from missed events
+
+If the video is playing and no frames have rendered for 300 ms, start the loop again.
+
+useEffect(() => {
+  const i = setInterval(() => {
+    const v = videoElRef.current;
+    if (!v) return;
+    const playing = !v.paused && v.readyState >= 2;
+    const frames = hud.getNumber?.('aRAFFrameCount') ?? 0;
+    if (playing && frames === 0) startRenderLoop(v);
+  }, 300);
+  return () => clearInterval(i);
+}, []);
+
+6) Acceptance criteria for your next test
+
+HUD fields after pressing Play:
+
+overlayId populated.
+
+videoSrc equals the visible player’s currentSrc.
+
+loopBackend is rVFC on Chrome.
+
+rAFStarted: YES.
+
+aRAFFrameCount increments every frame.
+
+contentRect equals the painted video size. The overlay surface matches it.
+
+Spotlight appears at or after selectedActivationTime and tracks the selected player through endMs.
+
+Once the loop is demonstrably running per frame on the exact <video> element on screen, with the absolute timebase lookup and a single transform, the spotlight will stick to the selected player. If you still see rAFStarted: NO and aRAFFrameCount: 0 after this patch, the overlay is mounted against a different video instance. In that case, log the element and source at loop start:
+
+console.info('[Overlay %s] startRenderLoop src=%s', overlayId, video.currentSrc);
+
+
+and verify that it matches the HUD’s videoSrc.

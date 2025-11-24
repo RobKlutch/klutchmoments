@@ -1,0 +1,134 @@
+robert [ ~ ]$ # Simplest FastAPI deployment on port 8000
+az containerapp create \
+  --name klutch-cpu-test \
+  --resource-group klutch-cpu-test \
+  --environment klutch-env \
+  --image tiangolo/uvicorn-gunicorn-fastapi:python3.11-slim \
+  --target-port 8000 \
+  --ingress external \
+  --cpu 1.0 \
+  --memory 2Gi
+
+Container app created. Access your app at https://klutch-cpu-test.yellowglacier-1ba16dc6.westus3.azurecontainerapps.io/
+
+{
+  "id": "/subscriptions/9ecf140e-19b1-40b0-8dea-beb4efde84a6/resourceGroups/klutch-cpu-test/providers/Microsoft.App/containerapps/klutch-cpu-test",
+  "identity": {
+    "type": "None"
+  },
+  "location": "West US 3",
+  "name": "klutch-cpu-test",
+  "properties": {
+    "configuration": {
+      "activeRevisionsMode": "Single",
+      "dapr": null,
+      "identitySettings": [],
+      "ingress": {
+        "additionalPortMappings": null,
+        "allowInsecure": false,
+        "clientCertificateMode": null,
+        "corsPolicy": null,
+        "customDomains": null,
+        "exposedPort": 0,
+        "external": true,
+        "fqdn": "klutch-cpu-test.yellowglacier-1ba16dc6.westus3.azurecontainerapps.io",
+        "ipSecurityRestrictions": null,
+        "stickySessions": null,
+        "targetPort": 8000,
+        "traffic": [
+          {
+            "latestRevision": true,
+            "weight": 100
+          }
+        ],
+        "transport": "Auto"
+      },
+      "maxInactiveRevisions": 100,
+      "registries": null,
+      "runtime": null,
+      "secrets": null,
+      "service": null
+    },
+    "customDomainVerificationId": "7FDCA5D80722831A2F87EC58805BC66FF2172591B3F5718FE3742E32983E90D3",
+    "delegatedIdentities": [],
+    "environmentId": "/subscriptions/9ecf140e-19b1-40b0-8dea-beb4efde84a6/resourceGroups/klutch-cpu-test/providers/Microsoft.App/managedEnvironments/klutch-env",
+    "eventStreamEndpoint": "https://westus3.azurecontainerapps.dev/subscriptions/9ecf140e-19b1-40b0-8dea-beb4efde84a6/resourceGroups/klutch-cpu-test/containerApps/klutch-cpu-test/eventstream",
+    "latestReadyRevisionName": "klutch-cpu-test--5n7a19w",
+    "latestRevisionFqdn": "klutch-cpu-test--5n7a19w.yellowglacier-1ba16dc6.westus3.azurecontainerapps.io",
+    "latestRevisionName": "klutch-cpu-test--5n7a19w",
+    "managedEnvironmentId": "/subscriptions/9ecf140e-19b1-40b0-8dea-beb4efde84a6/resourceGroups/klutch-cpu-test/providers/Microsoft.App/managedEnvironments/klutch-env",
+    "outboundIpAddresses": [
+      "20.125.76.124",
+      "20.125.74.58",
+      "20.14.119.70",
+      "135.234.107.40",
+      "135.234.118.135",
+      "20.14.118.252",
+      "4.236.1.136",
+      "20.118.180.220",
+      "20.125.72.245",
+      "4.236.29.28",
+      "4.236.28.230",
+      "4.236.28.126",
+      "4.236.29.23",
+      "4.236.28.206",
+      "4.236.29.43",
+      "20.118.146.180",
+      "20.118.148.199",
+      "4.227.58.38",
+      "134.33.25.222",
+      "4.236.8.251",
+      "4.236.39.174",
+      "20.14.40.97",
+      "4.236.61.216",
+      "20.118.144.32",
+      "20.118.146.221",
+      "4.227.76.26",
+      "4.227.76.45",
+      "4.227.76.46",
+      "4.227.76.20",
+      "4.227.76.51",
+      "4.227.76.18",
+      "4.249.40.133"
+    ],
+    "provisioningState": "Succeeded",
+    "runningStatus": "Running",
+    "template": {
+      "containers": [
+        {
+          "image": "tiangolo/uvicorn-gunicorn-fastapi:python3.11-slim",
+          "name": "klutch-cpu-test",
+          "resources": {
+            "cpu": 1.0,
+            "ephemeralStorage": "4Gi",
+            "memory": "2Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": "",
+      "scale": {
+        "cooldownPeriod": 300,
+        "maxReplicas": 10,
+        "minReplicas": null,
+        "pollingInterval": 30,
+        "rules": null
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "workloadProfileName": "Consumption"
+  },
+  "resourceGroup": "klutch-cpu-test",
+  "systemData": {
+    "createdAt": "2025-09-26T01:59:53.1479972",
+    "createdBy": "robert@klutch.live",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-09-26T01:59:53.1479972",
+    "lastModifiedBy": "robert@klutch.live",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/containerApps"
+}
+robert [ ~ ]$ 

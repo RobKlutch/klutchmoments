@@ -1,0 +1,45 @@
+ robert [ ~# Verify the container is runningning
+az containerapp show --name klutch-cpu-test --resource-group klutch-cpu-test --query "properties.runningStatus"
+
+# Check if there are any issues
+az containerapp logs show --name klutch-cpu-test --resource-group klutch-cpu-test --tail 50
+"Running"
+{"TimeStamp": "2025-09-26T02:15:29.50828", "Log": "Connecting to the container 'klutch-cpu-test'..."}
+{"TimeStamp": "2025-09-26T02:15:29.55733", "Log": "Successfully Connected to container: 'klutch-cpu-test' [Revision: 'klutch-cpu-test--6stoghp', Replica: 'klutch-cpu-test--6stoghp-7655ff47b7-r82hq']"}
+{"TimeStamp": "2025-09-26T02:11:04.8953865+00:00", "Log": "F Checking for script in /app/prestart.sh"}
+{"TimeStamp": "2025-09-26T02:11:04.8954106+00:00", "Log": "F Running script /app/prestart.sh"}
+{"TimeStamp": "2025-09-26T02:11:04.8954562+00:00", "Log": "F Running inside /app/prestart.sh, you could add migrations to this file, e.g.:"}
+{"TimeStamp": "2025-09-26T02:11:04.8954599+00:00", "Log": "F"}
+{"TimeStamp": "2025-09-26T02:11:04.8954651+00:00", "Log": "F #! /usr/bin/env bash"}
+{"TimeStamp": "2025-09-26T02:11:04.8954675+00:00", "Log": "F"}
+{"TimeStamp": "2025-09-26T02:11:04.8954698+00:00", "Log": "F # Let the DB start"}
+{"TimeStamp": "2025-09-26T02:11:04.8954721+00:00", "Log": "F sleep 10;"}
+{"TimeStamp": "2025-09-26T02:11:04.8954744+00:00", "Log": "F # Run migrations"}
+{"TimeStamp": "2025-09-26T02:11:04.8954766+00:00", "Log": "F alembic upgrade head"}
+{"TimeStamp": "2025-09-26T02:11:04.8954788+00:00", "Log": "F"}
+{"TimeStamp": "2025-09-26T02:11:05.2062277+00:00", "Log": "F {\"loglevel\": \"info\", \"workers\": 4, \"bind\": \"0.0.0.0:80\", \"graceful_timeout\": 120, \"timeout\": 120, \"keepalive\": 5, \"errorlog\": \"-\", \"accesslog\": \"-\", \"workers_per_core\": 1.0, \"use_max_workers\": null, \"host\": \"0.0.0.0\", \"port\": \"80\"}"}
+{"TimeStamp": "2025-09-26T02:11:05.3399554+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [1] [INFO] Starting gunicorn 23.0.0"}
+{"TimeStamp": "2025-09-26T02:11:05.3401068+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [1] [INFO] Listening at: http://0.0.0.0:80 (1)"}
+{"TimeStamp": "2025-09-26T02:11:05.3401833+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [1] [INFO] Using worker: uvicorn.workers.UvicornWorker"}
+{"TimeStamp": "2025-09-26T02:11:05.3423154+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [7] [INFO] Booting worker with pid: 7"}
+{"TimeStamp": "2025-09-26T02:11:05.4316098+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [8] [INFO] Booting worker with pid: 8"}
+{"TimeStamp": "2025-09-26T02:11:05.4572099+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [9] [INFO] Booting worker with pid: 9"}
+{"TimeStamp": "2025-09-26T02:11:05.5407194+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [10] [INFO] Booting worker with pid: 10"}
+{"TimeStamp": "2025-09-26T02:11:05.6789626+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [7] [INFO] Started server process [7]"}
+{"TimeStamp": "2025-09-26T02:11:05.6793168+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [7] [INFO] Waiting for application startup."}
+{"TimeStamp": "2025-09-26T02:11:05.6798243+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [7] [INFO] Application startup complete."}
+{"TimeStamp": "2025-09-26T02:11:05.8286457+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [8] [INFO] Started server process [8]"}
+{"TimeStamp": "2025-09-26T02:11:05.8289868+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [8] [INFO] Waiting for application startup."}
+{"TimeStamp": "2025-09-26T02:11:05.8292357+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [8] [INFO] Application startup complete."}
+{"TimeStamp": "2025-09-26T02:11:05.8821665+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [9] [INFO] Started server process [9]"}
+{"TimeStamp": "2025-09-26T02:11:05.8822195+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [9] [INFO] Waiting for application startup."}
+{"TimeStamp": "2025-09-26T02:11:05.8824315+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [9] [INFO] Application startup complete."}
+{"TimeStamp": "2025-09-26T02:11:05.9095743+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [10] [INFO] Started server process [10]"}
+{"TimeStamp": "2025-09-26T02:11:05.9096156+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [10] [INFO] Waiting for application startup."}
+{"TimeStamp": "2025-09-26T02:11:05.9098215+00:00", "Log": "F [2025-09-26 02:11:05 +0000] [10] [INFO] Application startup complete."}
+{"TimeStamp": "2025-09-26T02:11:54.3926681+00:00", "Log": "F 100.100.0.122:48262 - \"GET / HTTP/1.1\" 200"}
+{"TimeStamp": "2025-09-26T02:11:54.6060854+00:00", "Log": "F 100.100.0.122:48262 - \"GET /docs HTTP/1.1\" 200"}
+{"TimeStamp": "2025-09-26T02:15:04.4162048+00:00", "Log": "F 100.100.0.37:42052 - \"GET / HTTP/1.1\" 200"}
+{"TimeStamp": "2025-09-26T02:15:04.6508639+00:00", "Log": "F 100.100.0.122:36150 - \"GET /docs HTTP/1.1\" 200"}
+{"TimeStamp": "2025-09-26T02:15:21.6682115+00:00", "Log": "F 100.100.0.122:50958 - \"GET / HTTP/1.1\" 200"}
+robert [ ~ ]$ 

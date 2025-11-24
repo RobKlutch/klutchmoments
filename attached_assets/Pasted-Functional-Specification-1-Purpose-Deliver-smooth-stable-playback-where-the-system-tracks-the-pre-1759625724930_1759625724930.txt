@@ -1,0 +1,248 @@
+Functional Specification
+1) Purpose
+
+Deliver smooth, stable playback where the system tracks the previously selected player and renders a highlight that stays locked to that player for the entire preview.
+
+2) Prerequisites and Inputs
+
+From Timeline stage
+
+selectedPlayer.initBox in pixel space for the natural video size
+
+selectedPlayer.detection_at_ms timestamp
+
+videoDims.videoWidth, videoDims.videoHeight
+
+Effects settings
+
+Spotlight ring parameters with hard bounds and defaults
+
+Size: 5% to 60% of frame diagonal, default 18%
+
+Intensity: 0% to 100%, default 60%
+
+Feather: 0% to 50%, default 20%
+
+All UI controls are clamped to bounds. Values like 3000% and 8000% are invalid and must be prevented and clamped.
+
+3) High level behavior
+
+Playback begins at 0:00
+
+Tracking and highlight remain hidden until playback reaches selectedPlayer.detection_at_ms
+
+At or just before that timestamp, the system locks to the selected player and begins tracking
+
+The highlight follows the tracked player for the remainder of playback
+
+No fallback grid or secondary trackers are active
+
+4) Single source of truth for tracking
+
+External only
+
+Use Replicate YOLOv11 for detection and tracking in this stage
+
+Environment guard: EXTERNAL_ONLY=1
+
+Prohibit internal trackers and fallbacks
+
+No HOG, no strategic grid, no internal loops
+
+A single tracking owner is active for the entire preview
+
+5) API contracts
+
+POST /api/track-player
+
+Request: { init_box, from_ms, video_id }
+
+Response: stream or batches of { t_ms, x1, y1, x2, y2, track_id } in pixel space of natural video
+
+Contract rules
+
+Pixel coordinates only, no normalized units
+
+The same track_id is maintained across frames for the selected player
+
+Server enforces backpressure and rate limits to avoid flooding
+
+6) Client lifecycle in Video Preview
+
+On enter
+
+Validate selectedPlayer and dims. If missing, show error and block playback
+
+Seek video to 0:00, prewarm decoder
+
+Set requestId for this session
+
+On Play
+
+Start a single tracking session using selectedPlayer.initBox and detection_at_ms
+
+Do not start any other detection or tracking scheduler
+
+Per frame render
+
+If currentTimeMs < detection_at_ms, overlay is hidden
+
+When currentTimeMs >= detection_at_ms, draw spotlight at the last known tracked box for the selected track_id
+
+If a frame arrives without a new box, hold previous box for up to N frames and interpolate linearly
+
+On Pause or End
+
+Do not spawn new requests
+
+On End, stop tracking and release resources
+
+On Unmount or navigation
+
+Cancel in-flight requests and streams
+
+Remove event listeners to prevent setState on unmounted components
+
+7) Data flow and state
+
+Ingest
+
+Network stream updates a single store key, e.g. workflow.previewTracks[track_id]
+
+Select
+
+Render code reads the most recent box whose t_ms is closest to the current video time
+
+Immutability
+
+Always replace arrays and objects, never mutate in place
+
+Concurrency safety
+
+Guard all async paths with requestId. Drop stale responses
+
+8) Rendering and alignment
+
+Basis
+
+Use natural video size for all calculations. Do not recompute or normalize
+
+Mapping to display
+
+When the video is letterboxed with object-fit: contain, compute scale and offsets once and map pixel boxes to display coordinates
+
+HiDPI
+
+Set canvas width and height attributes to container * devicePixelRatio and apply a matching transform
+
+9) Highlight behavior
+
+Anchor
+
+Spotlight is anchored to the tracked box center on every frame
+
+Size
+
+Derive default radius from box size or allow user size. Clamp to bounds
+
+Smoothing
+
+Apply a light One Euro or EMA filter to reduce micro jitter. Never introduce lag beyond one or two frames
+
+10) Performance and flooding guardrails
+
+One tracking owner
+
+Exactly one stream or polling loop in Video Preview
+
+No duplicate triggers
+
+Disable effects that retry or reissue tracking requests on hover, time updates, or re-renders
+
+Throttling
+
+If using polling instead of stream, cap to a safe cadence and interpolate between updates
+
+Logging
+
+Reduce console logging to info-level checkpoints. Remove verbose per-frame logs in production
+
+11) Error handling and crash prevention
+
+Bounds checking
+
+Clamp all effect controls. Reject or correct invalid values before render
+
+Defensive coding
+
+Null checks around video refs, dims, and boxes. Early returns before drawing
+
+Stage transitions
+
+Disable the Process button during async shutdown. Wait for cleanup to finish
+
+White screen root causes to rule out
+
+Unhandled exceptions from undefined boxes
+
+setState on unmounted components from stale streams
+
+Infinite re-render loops from dependency mistakes
+
+12) Telemetry to add
+
+Stage events
+
+preview_enter, preview_play, preview_tracking_start, preview_tracking_stop, preview_exit
+
+Metrics
+
+First lock latency in ms from detection_at_ms
+
+Box update rate per second
+
+Missed frames per minute
+
+Average jitter in pixels between frames
+
+Errors
+
+Full stack traces on crash
+
+Last two tracking payloads prior to crash
+
+Current state snapshot keys that the renderer reads
+
+13) Acceptance criteria
+
+Starts at 0:00. Tracking and highlight become visible exactly when playback reaches detection_at_ms
+
+The highlight stays locked to the selected player for the entire preview
+
+No grid or fallback overlay is ever shown
+
+No white crash screen on end or on navigation to the next stage
+
+With React DevTools open, detectionSource = 'replicate', a single tracking owner is present, and arrays are replaced immutably
+
+Console shows one track-player request or one stream, not a flood
+
+14) Test plan
+
+Functional
+
+Timeline pause, detect once, select player, Effects freeze frame centers on the same box
+
+Video Preview play. Verify lock begins at detection_at_ms and never detaches
+
+Stress
+
+Scrub around the selection time. Ensure no duplicate schedulers start
+
+Error
+
+Simulate temporary tracking drop. Overlay should hold last known position for a short window, then fade if unavailable
+
+Performance
+
+Confirm smooth playback at or above 24 fps and that CPU spikes are absent

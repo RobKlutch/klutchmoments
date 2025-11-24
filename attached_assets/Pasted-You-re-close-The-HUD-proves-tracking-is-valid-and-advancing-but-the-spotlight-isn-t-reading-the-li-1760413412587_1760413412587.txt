@@ -1,0 +1,125 @@
+You’re close. The HUD proves tracking is valid and advancing, but the spotlight isn’t reading the live tracker position. Two telltales in your screenshot:
+
+JUMP DETECTION → lastPos: (0.036, 0.526) changes over time.
+
+Spotlight position shown on the video/HUD → Pos: (0.029, 0.449) is constant.
+
+That mismatch means the overlay is rendering from a stale source (seed/manual anchor or a closed-over state), not the per-frame bbox.
+
+Below is a focused fix plan that resolves “visible but not tracking.”
+
+Root causes that fit your HUD
+
+Stale closure in the render loop. renderAtAbsTime or the rVFC/RAF callback closes over old values (seedBox/initial pos).
+
+Wrong source after activation. The overlay keeps using “manual/seed” coordinates instead of switching to “tracker” once a valid bbox exists.
+
+Guard prevents updates. A “didRectChange?” or shallow equality guard bails because the same object reference is reused, or values are rounded to the same pixel.
+
+State vs ref. Position is stored in React state and batched/debounced away, so the DOM/SVG never updates every frame.
+
+Minimal corrective patch
+1) Read live values via refs inside the frame callback
+
+Do not rely on captured props/state. Keep what changes in useRef and update refs on change.
+
+// keep live values
+const trackIdRef = useRef<string | null>(null);
+const effectRef  = useRef<EffectConfig>(effectConfig);
+const segRef     = useRef(segment);
+useEffect(() => { trackIdRef.current = selectedTrackId; }, [selectedTrackId]);
+useEffect(() => { effectRef.current  = effectConfig;    }, [effectConfig]);
+useEffect(() => { segRef.current     = segment;         }, [segment]);
+
+2) Force “tracker” as the source once a valid bbox exists
+
+Kill the manual/seed path the moment tracking is valid.
+
+let usingTracker = false;
+
+function renderAtAbsTime(tAbsMs: number, video: HTMLVideoElement) {
+  const seg = segRef.current!;
+  const tClip = tAbsMs - clipStartOffsetMs;
+  if (tClip < seg.startMs || tClip > seg.endMs) { overlay.hide(); return; }
+
+  const id = trackIdRef.current;
+  if (!id) { overlay.hide(); return; }
+
+  const bbox = tracker.getBoxByIdAtTime(id, tAbsMs, { toleranceMs: 40 });
+  const hasBBox = bbox && bbox.w > 0 && bbox.h > 0;
+  if (!hasBBox) { overlay.hide(); return; }
+
+  usingTracker = true; // once true, never fall back in this session
+
+  const vRect = getPaintedVideoRect(video);
+  const rect  = normCenterToTopLeftAbsolute(bbox, vRect);
+
+  overlay.show();
+  overlay.render(effectRef.current, rect); // draw every frame
+}
+
+3) Remove any equality/“no-op” guard around drawing
+
+Do not skip drawing based on reference equality or rounded pixels; canvas/SVG draws are cheap compared to tracking I/O.
+
+// remove patterns like:
+if (prevRect && shallowEqual(prevRect, rect)) return;
+// or
+if (Math.round(prevX) === Math.round(x) && ...) return;
+
+4) Write position directly to the DOM/SVG (not React state)
+
+React state in a per-frame loop will drop updates. Update the element (or canvas) directly.
+
+function render(effect: EffectConfig, rect: {x:number;y:number;w:number;h:number}) {
+  // DOM overlay example
+  overlayEl.style.transform = `translate(${rect.x}px, ${rect.y}px)`;
+  overlayEl.style.width  = `${rect.w}px`;
+  overlayEl.style.height = `${rect.h}px`;
+  // canvas path: draw at rect each frame
+}
+
+5) Ensure the loop uses absolute media time
+
+You already fixed this, but keep it here to avoid regression.
+
+const step = (_:number, meta: VideoFrameCallbackMetadata) => {
+  renderAtAbsTime(Math.round(meta.mediaTime * 1000), video);
+  hud.inc('aRAFFrameCount');
+  rvfcId = video.requestVideoFrameCallback(step);
+};
+
+Quick instrumentation to prove the fix
+
+Log once per ~15 frames from inside the callback:
+
+if ((hud.get('aRAFFrameCount') ?? 0) % 15 === 0) {
+  hud.set('dbg_bBox', bbox ? [bbox.cx.toFixed(3), bbox.cy.toFixed(3)] : null);
+  hud.set('dbg_source', usingTracker ? 'tracker' : 'seed');
+}
+
+
+You should see dbg_source: tracker and dbg_bBox changing. If HUD’s lastPos changes but your overlay remains fixed, you’re definitely reading the wrong value or never updating the DOM.
+
+Sanity checks tied to your screenshot
+
+Your HUD shows ID Match: YES, hasValidBoxForSelected: YES, framesSinceLastValid: 0, so tracking is alive.
+
+It also shows isSpotlightActive: YES, but the on-screen spotlight doesn’t move. That means the rendering path is frozen, not tracking.
+
+The left overlay label says “(MANUAL)”; make sure that label is updated when usingTracker flips to true. If it keeps saying MANUAL, your source switch is not executed or the UI label reads a different store.
+
+Acceptance criteria after patch
+
+While playing, spotlight center follows per-frame bbox (visibly moves).
+
+HUD (new debug fields) shows dbg_source: tracker and changing dbg_bBox.
+
+No equality guards block drawing; DOM/SVG/canvas position updates each frame.
+
+Resizes preserve alignment (you already fixed surface sizing).
+
+If it still sticks after this change, share one short console sample (10 lines) captured from inside the rVFC callback with:
+
+tAbsMs, bbox.cx, bbox.cy, usingTracker, and the final rect.x, rect.y.
+That will make it obvious whether the tracker is moving and the renderer isn’t, or vice versa.

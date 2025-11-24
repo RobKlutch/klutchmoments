@@ -1,0 +1,154 @@
+Overview
+
+The Klutch platform enables users to generate personalized highlight videos from sports footage through a sequence of intelligent, AI-powered stages.
+Each stage builds on the previous one, with data and user inputs carried forward through a persistent session context so that visual effects, selections, and player tracking remain synchronized from upload to export.
+
+1. Upload Stage
+
+Purpose:
+Import and prepare source video for AI processing.
+
+Functionality:
+
+User uploads a video file (e.g., MP4, MOV).
+
+The system extracts metadata (resolution, frame rate, duration).
+
+Video is segmented and preprocessed (frame normalization, downscaling, keyframe indexing).
+
+YOLOv11 detection model is initialized for the next stage.
+
+Output Data to Next Stage:
+
+Video file path and metadata.
+
+Indexed frame data for timeline use.
+
+AI detection model checkpoint loaded.
+
+Session ID for continuous workflow linkage.
+
+2. Timeline Stage
+
+Purpose:
+Define the exact moment in the clip where highlight creation begins.
+
+Functionality:
+
+Displays the uploaded video with an interactive scrub bar.
+
+User pauses at the desired moment to mark a highlight timestamp.
+
+“Detect Players” function runs YOLOv11 object detection on that frame, drawing bounding boxes on all detected players.
+
+User selects one player box as the highlighted subject.
+
+Output Data to Next Stage:
+
+Selected player ID and coordinates (bounding box).
+
+Timestamp of the chosen frame.
+
+Frame index reference for temporal tracking.
+
+Context packet including clip segment range.
+
+3. Effects Stage
+
+Purpose:
+Choose and preview AI-driven visual effects for the highlight.
+
+Functionality:
+
+User selects from effect types (e.g., spotlight, disk, glow ring).
+
+Parameters: intensity, radius, duration, color.
+
+Selected effect binds to the previously chosen player ID.
+
+Configurations saved as JSON with timestamp linkage.
+
+Option to preview still frame to confirm effect appearance.
+
+Output Data to Next Stage:
+
+Effect type and configuration JSON.
+
+Player tracking ID.
+
+Frame reference and timestamp from Timeline Stage.
+
+Transition flag for Video Preview Stage (ready to render).
+
+4. Video Preview Stage
+
+Purpose:
+Render and verify a real-time playback preview combining player tracking and chosen visual effects.
+
+Functionality:
+
+System replays the video starting from the selected highlight timestamp.
+
+YOLOv11 + ByteTrack (or SORT) tracker follows the same player ID through all frames.
+
+Effect layer is dynamically applied to the tracked player.
+
+User verifies playback continuity, effect accuracy, and smoothness.
+
+Controls: play/pause, re-select player, change effect, or trim duration.
+
+Output Data to Next Stage:
+
+Finalized effect-player mapping.
+
+Confirmed video segment boundaries (start/end times).
+
+Playback confirmation flag.
+
+Rendering metadata package for export (JSON + video reference).
+
+5. Processing Stage
+
+Purpose:
+Generate the final processed clip.
+
+Functionality:
+
+GPU job is queued (via Replicate or local GPU).
+
+YOLOv11 tracking data and effect configurations are merged frame-by-frame.
+
+Render engine composites the visual effect layer onto the tracked player for each frame in the highlight segment.
+
+Output encoded in H.264/MP4 format with preserved resolution and audio.
+
+Progress status displayed (queued, rendering, complete).
+
+Output Data to Next Stage:
+
+Completed highlight video file.
+
+Render metadata (duration, resolution, effect applied, tracking success rate).
+
+Session data archive for audit or reuse.
+
+6. Export Stage
+
+Purpose:
+Deliver the finished highlight and enable sharing or download.
+
+Functionality:
+
+User preview confirms final output.
+
+Options to download, share, or publish (e.g., social link, email, or team feed).
+
+Session stored to user account for reuse or batch highlight generation.
+
+Data cleanup and compression for efficiency.
+
+Output:
+
+Final exported video file.
+
+Metadata summary for dashboard analytics (e.g., effect usage, average highlight length).

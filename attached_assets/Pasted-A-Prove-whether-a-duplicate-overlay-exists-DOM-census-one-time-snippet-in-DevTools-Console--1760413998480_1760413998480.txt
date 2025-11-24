@@ -1,0 +1,124 @@
+A) Prove whether a duplicate overlay exists
+
+DOM census (one-time snippet in DevTools Console)
+
+[...document.querySelectorAll('[data-role="spotlight-overlay"]')].map(el => ({
+  overlayId: el.getAttribute('data-overlay-id'),
+  z: getComputedStyle(el).zIndex,
+  rect: el.getBoundingClientRect().toJSON?.() || el.getBoundingClientRect(),
+  visible: getComputedStyle(el).visibility,
+  opacity: getComputedStyle(el).opacity,
+}));
+
+
+Expected: exactly 1 item. If you see 2+, you have a duplicate.
+
+Live movement probe
+Add, inside the frame callback, a visual heartbeat on the overlay being updated:
+
+overlayEl.style.outline = (hud.get('aRAFFrameCount') % 10 < 5) ? '2px solid lime' : '2px solid transparent';
+
+
+If the limed overlay is not the one you see on top, a different (static) overlay is covering it.
+
+Instance verification
+In the callback, assert the element you are writing to is the one in the DOM:
+
+const domEl = document.querySelector(`[data-overlay-id="${overlayId}"]`);
+if (domEl !== overlayEl) console.warn('Overlay element mismatch', { overlayId });
+
+B) Remove duplicates and prevent re-occurrence
+
+Single overlay container per video
+Create a dedicated container under the video wrapper and enforce a single child.
+
+function getOverlayContainer(videoWrap) {
+  let c = videoWrap.querySelector('[data-role="overlay-container"]');
+  if (!c) {
+    c = document.createElement('div');
+    c.dataset.role = 'overlay-container';
+    Object.assign(c.style, { position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3 });
+    videoWrap.appendChild(c);
+  }
+  return c;
+}
+
+function mountOverlay(container, overlayEl, overlayId) {
+  // remove all previous overlays
+  [...container.children].forEach(n => n.remove());
+  overlayEl.dataset.role = 'spotlight-overlay';
+  overlayEl.dataset.overlayId = overlayId;
+  container.appendChild(overlayEl);
+}
+
+
+Dispose correctly on stage transitions
+On leaving Preview, or when sessionId changes, always:
+
+cancel frame loop
+
+remove listeners
+
+remove overlay element
+
+function disposeOverlay(container) {
+  [...container.querySelectorAll('[data-role="spotlight-overlay"]')].forEach(n => n.remove());
+  stopRenderLoop();
+}
+
+
+Kill the seed/ghost once tracking is active
+If you draw a ghost “seed” overlay, remove it the moment a valid bbox is acquired:
+
+if (!usingTracker && hasBBox) {
+  usingTracker = true;
+  seedOverlay?.remove();
+  seedOverlay = null;
+}
+
+C) Ensure the live overlay is the one being updated
+
+Use a callback ref to bind to the visible <video> and its wrapping container. Attach listeners when the node mounts, detach on unmount. You already moved in this direction; keep it.
+
+Keep all live values in refs and render directly from refs each frame. You already fixed stale closures; verify all render paths (DOM/SVG/canvas) now read liveTrackingBoxRef.current.
+
+Remove “no-op” guards that skip drawing. Any shallow-equality or rounded-pixel guards can freeze motion:
+
+// Delete guards like:
+if (prevRect && shallowEqual(prevRect, rect)) return;
+
+D) Quick acceptance test
+
+DevTools census returns exactly 1 [data-role="spotlight-overlay"].
+
+In the HUD, rAFStarted: YES and rAFFrameCount increases during playback.
+
+The overlay with the heartbeat outline is the one you see; it moves every frame.
+
+On acquisition, the ghost/seed disappears and only the live overlay remains.
+
+Spotlight tracks the player smoothly and stays aligned through window resizes.
+
+E) If it is still stuck after this, capture 5 frame samples from inside the callback
+
+Log these once every 10 frames for 5 consecutive samples:
+
+console.log('F', {
+  overlayId,
+  tAbsMs,
+  bbox: { cx: +bbox.cx.toFixed(3), cy: +bbox.cy.toFixed(3), w: +bbox.w.toFixed(3), h: +bbox.h.toFixed(3) },
+  rect: { x: Math.round(rect.x), y: Math.round(rect.y), w: Math.round(rect.w), h: Math.round(rect.h) },
+  el: overlayEl.getAttribute('data-overlay-id'),
+  transform: overlayEl.style.transform,
+});
+
+
+Interpretation:
+
+If bbox and rect change but transform does not change, the code is updating the wrong element.
+
+If transform changes and the visible overlay does not, a different overlay is above it. Remove duplicates and enforce the single-container pattern.
+
+If bbox is changing but rect is constant, the coordinate transform or contentRect is not being recomputed correctly. Re-evaluate getPaintedVideoRect(video) and ensure no double letterbox offsets.
+
+Given the HUD already shows valid tracking and correct timebase, resolving duplicates and enforcing a single overlay instance per video should clear the last blocker and make the spotlight track properly.

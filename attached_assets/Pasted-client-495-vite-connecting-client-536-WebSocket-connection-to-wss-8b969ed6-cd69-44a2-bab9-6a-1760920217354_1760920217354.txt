@@ -1,0 +1,1063 @@
+client:495 [vite] connecting...
+client:536 WebSocket connection to 'wss://8b969ed6-cd69-44a2-bab9-6a60b5fe5e49-00-2w3dsgm78y30z.worf.replit.dev/?token=kgDoNzPxEm-8' failed: 
+setupWebSocket @ client:536
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=kgDoNzPxEm-8' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+chunk-WERSD76P.js?v=910b9b73:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+stageLogger.ts:87 [2025-10-20T00:28:01.600Z] [CreatorDashboard] [INFO] StageLogger initialized | {"stageName":"CreatorDashboard"}
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:134 🆔 Generated brand new session ID for first upload: 611d40c9-9427-4d8a-86c8-858f80493643
+VideoUpload.tsx:58 Video selected: Alex Goal 2.mp4 1.9MB
+creator-dashboard.tsx:146 🧹 Backend tracking reset for session: Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+CombinedClipPlayer.tsx:201 ⚠️ SEEK EFFECT TRIGGERED: Object
+CombinedClipPlayer.tsx:189 🔍 COMBINED_CLIP_PLAYER PROPS: Object
+CombinedClipPlayer.tsx:291 🚫 TIMELINE: Automatic keyframe detection DISABLED (manual clicks only)
+CombinedClipPlayer.tsx:889 Video loaded, actual duration: 10.2
+CombinedClipPlayer.tsx:230 🎯 PERFORMING VIDEO SEEK: Object
+CombinedClipPlayer.tsx:237 🚀 INITIAL SEEK APPLIED in CombinedClipPlayer: Object
+creator-dashboard.tsx:179 🎯 handleTimeSelection CALLED: Object
+creator-dashboard.tsx:181 🎯 handleTimeSelection - Previous timeSelection: null
+creator-dashboard.tsx:187 🎯 handleTimeSelection - New timeSelection: Object
+CombinedClipPlayer.tsx:488 🎯 SELECTION DRAG COMPLETE: Triggering API detection at time: 5.100
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:179 🎯 handleTimeSelection CALLED: Object
+creator-dashboard.tsx:181 🎯 handleTimeSelection - Previous timeSelection: Object
+creator-dashboard.tsx:187 🎯 handleTimeSelection - New timeSelection: Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+CombinedClipPlayer.tsx:336 🎯 TIMELINE CLICK: Triggering API detection at time: 5.938
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:273 🔍 DETECTION RESPONSE: Object
+creator-dashboard.tsx:317 🔍 NORMALIZED PLAYER: Object
+creator-dashboard.tsx:327 🔍 STATE UPDATE: Object
+CombinedClipPlayer.tsx:357 ✅ TIMELINE CLICK: API detection completed
+creator-dashboard.tsx:349 🔍 NEW STATE: Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+CombinedClipPlayer.tsx:189 🔍 COMBINED_CLIP_PLAYER PROPS: Object
+CombinedClipPlayer.tsx:1005 🎯 [UI] bbox onPointerUp fired: Object
+CombinedClipPlayer.tsx:1008 🎯 CALLING onPlayerSelect with player: Object
+creator-dashboard.tsx:385 🎯 handlePlayerSelect CALLED: Object
+creator-dashboard.tsx:428 🔧 handlePlayerSelect: playerWithId created: Object
+creator-dashboard.tsx:433 🔍 handlePlayerSelect: createSafePlayer result: Object
+creator-dashboard.tsx:496 ✅ SANITIZED PLAYER for workflow state: Object
+creator-dashboard.tsx:497 🔍 PLAYER ID TRACE: Object
+creator-dashboard.tsx:504 🚀 handlePlayerSelect: Setting workflow.selectedPlayer NOW
+creator-dashboard.tsx:519 ✅ handlePlayerSelect: workflow.selectedPlayer SET successfully Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+CombinedClipPlayer.tsx:987 🔥 [UI] bbox onClick fired: Object
+CombinedClipPlayer.tsx:991 🎯 CALLING onPlayerSelect with player: Object
+creator-dashboard.tsx:385 🎯 handlePlayerSelect CALLED: Object
+creator-dashboard.tsx:428 🔧 handlePlayerSelect: playerWithId created: Object
+creator-dashboard.tsx:433 🔍 handlePlayerSelect: createSafePlayer result: Object
+creator-dashboard.tsx:491 ⏭️ Skipping tracking reset - same player selected
+creator-dashboard.tsx:496 ✅ SANITIZED PLAYER for workflow state: Object
+creator-dashboard.tsx:497 🔍 PLAYER ID TRACE: Object
+creator-dashboard.tsx:504 🚀 handlePlayerSelect: Setting workflow.selectedPlayer NOW
+creator-dashboard.tsx:519 ✅ handlePlayerSelect: workflow.selectedPlayer SET successfully Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:484 ✅ Backend tracking reset with anchor coordinates: Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:179 🎯 handleTimeSelection CALLED: Object
+creator-dashboard.tsx:181 🎯 handleTimeSelection - Previous timeSelection: Object
+creator-dashboard.tsx:187 🎯 handleTimeSelection - New timeSelection: Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+EffectStaticPreview.tsx:283 🖼️ Image loaded: Object
+effectRenderer.ts:93 🎯 Dynamic sizing: player=53.2px, multiplier=0.8, result=42.6px
+effectRenderer.ts:93 🎯 Dynamic sizing: player=53.2px, multiplier=0.8, result=42.6px
+effectRenderer.ts:93 🎯 Dynamic sizing: player=53.2px, multiplier=0.8, result=42.6px
+effectRenderer.ts:93 🎯 Dynamic sizing: player=53.2px, multiplier=0.8, result=42.6px
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:545 🚀🚀🚀 handleEffectConfirm CALLED AT START 🚀🚀🚀
+creator-dashboard.tsx:546 🎬 handleEffectConfirm CALLED - Attempting navigation to video-preview stage
+creator-dashboard.tsx:547 📋 Current workflow state: Object
+creator-dashboard.tsx:624 ✅ Navigation to preview allowed - player validated: Object
+creator-dashboard.tsx:633 🎯 EFFECTS STAGE EXIT - Complete effect_config: Object
+stageLogger.ts:87 [2025-10-20T00:28:37.508Z] [CreatorDashboard] [INFO] NAVIGATION: Effects → Video Preview | {"currentStep":"effects","hasTimeSelection":true,"hasSelectedPlayer":true,"hasSelectedEffect":true}
+creator-dashboard.tsx:663 🎯 INITIALIZING BACKEND TRACKING before Video Preview: Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:689 ✅ Backend tracking initialized with anchor coordinates for Video Preview
+creator-dashboard.tsx:699 🚀 CRITICAL: Changing workflow.step to "video-preview" NOW
+creator-dashboard.tsx:710 🔍 PRE-TRANSITION STATE: Object
+stageLogger.ts:130 [2025-10-20T00:28:37.553Z] [CreatorDashboard] [DEBUG] Pre-transition state | {"step":"effects","timeSelection":{"start":0,"end":10.2},"detectionTime":5.938474576271186,"hasTimeSelection":true,"timeSelectionStart":0,"timeSelectionEnd":10.2}
+creator-dashboard.tsx:730 📸 POST-TRANSITION STATE: Object
+stageLogger.ts:87 [2025-10-20T00:28:37.553Z] [CreatorDashboard] [INFO] State transition complete | {"step":"video-preview","timeSelection":{"start":0,"end":10.2},"detectionTime":5.938474576271186,"hasTimeSelection":true,"timeSelectionStart":0,"timeSelectionEnd":10.2,"hasSelectedEffect":true,"effectName":"Spotlight Ring","effectSettings":{"intensity":30,"size":80,"color":"#3b82f6","slowMotionSegments":[],"dynamicZoom":{"enabled":false,"intensity":"moderate","playerFocused":true,"actionTriggered":true,"contextAware":true,"multiPlayerSupport":false,"zoomInLevel":1.8,"zoomOutLevel":0.7,"transitionDuration":1.5,"triggerSensitivity":0.6}}}
+creator-dashboard.tsx:735 ✅ CRITICAL: workflow.step changed to "video-preview" successfully
+stageLogger.ts:87 [2025-10-20T00:28:37.553Z] [CreatorDashboard] [INFO] Navigation complete - Video Preview should now render
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+stageLogger.ts:87 [2025-10-20T00:28:37.553Z] [CreatorDashboard] [INFO] RENDER CHECK: Video Preview stage is rendering | {"hasTimeSelection":true,"hasSelectedPlayer":true,"hasVideoUrl":true}
+creator-dashboard.tsx:1356 🎬 RENDERING VideoPreviewPlayer with props: Object
+stageLogger.ts:87 [2025-10-20T00:28:37.556Z] [VideoPreviewErrorBoundary] [INFO] StageLogger initialized | {"stageName":"VideoPreviewErrorBoundary"}
+VideoPreviewPlayer.tsx:61 🎬 VIDEOPREVIEWPLAYER RENDER! Object
+VideoPreviewPlayer.tsx:176 🔍 VALIDATEDPLAYER COMPUTATION: Object
+VideoPreviewPlayer.tsx:196 ✅ VALIDATEDPLAYER CREATED: Object
+VideoPreviewPlayer.tsx:204 🔍 SELECTIONANCHOR COMPUTATION: Object
+useSpotlightTracker.ts:947 🔥🔥🔥 useSpotlightTracker v2.1 INITIALIZED - BUG FIXED 🔥🔥🔥 Object
+VideoPreviewPlayer.tsx:1099 🎯 OVERLAY VISIBILITY CHECK: Object
+SpotlightOverlay.tsx:1796 🎬 SpotlightOverlay: useLayoutEffect MOUNTING - waiting for elements
+SpotlightOverlay.tsx:1804 🔍 SpotlightOverlay: Checking element availability: Object
+SpotlightOverlay.tsx:1816 ✅ SpotlightOverlay: SVG CONTAINER MOUNTED SUCCESSFULLY: Object
+SpotlightOverlay.tsx:1877 🎭 [Overlay 57be5d82] Video initial state: Object
+SpotlightOverlay.tsx:1912 ✅ [Overlay 57be5d82] All listeners attached successfully
+VideoPreviewPlayer.tsx:70 🚀🚀🚀 VIDEOPREVIEWPLAYER MOUNTED (LAYOUT)! 🚀🚀🚀 Object
+SpotlightOverlay.tsx:59 🔍 SpotlightOverlay RECEIVED selectedPlayer prop: Object
+SpotlightOverlay.tsx:92 [Overlay 57be5d82-2584-4af5-a741-3d3bf2eb1cb2] MOUNT
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+SpotlightOverlay.tsx:760 🔄 SPOTLIGHT: SOURCE TRANSITION: null → anchor at 1760920117577 (smoothing reset)
+SpotlightOverlay.tsx:766 🎯 SPOTLIGHT: Selected source "anchor" locked for 1000ms
+SpotlightOverlay.tsx:1049 🚀🚀🚀 SpotlightOverlay COMPONENT MOUNTED 🚀🚀🚀: Object
+SpotlightOverlay.tsx:1785 🎨 PROP CHANGE - calling renderIfNeeded
+SpotlightOverlay.tsx:1345 ❌ SpotlightOverlay early exit: video dimensions not ready Object
+SpotlightOverlay.tsx:1960 ✅ DOM Census: Single spotlight overlay (57be5d82)
+useSpotlightTracker.ts:1014 ✅ useSpotlightTracker: Component mounted
+useSpotlightTracker.ts:1047 🔄🔄🔄 useSpotlightTracker: currentBox CHANGED 🔄🔄🔄: Object
+useSpotlightTracker.ts:2703 🌱 useSpotlightTracker: Tracker initialized
+useSpotlightTracker.ts:2716 🔗 Setting initial active video element
+useSpotlightTracker.ts:3445 🔍 AUTO-REBIND SCAN: Object
+useSpotlightTracker.ts:3513 ⚠️ AUTO-REBIND: No suitable video found: Object
+useSpotlightTracker.ts:2725 🌱 useSpotlightTracker: Initializing tracker with default box
+useSpotlightTracker.ts:2732 📦 GUARANTEED NON-NULL TRACKING BOX INITIALIZED: Object
+useSpotlightTracker.ts:2748 🌱 useSpotlightTracker: Overriding with selection anchor: Object
+useSpotlightTracker.ts:2762 🎯 SEEDED WITH ACTUAL PLAYER BBOX: player_3 Object
+useSpotlightTracker.ts:786 🎯 ID-LOCKED TRACKING: Selected player ID=player_3
+useSpotlightTracker.ts:2768 🎯 ID-LOCKED TRACKING: Selected player ID=player_3 (immediate bind)
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2797 📦 SELECTION ANCHOR CURRENTBOX UPDATE: Object
+HighlightLock.ts:120 🔒 HighlightLock CREATED: Object
+useSpotlightTracker.ts:2839 ✅ HIGHLIGHTLOCK CREATED (MANUAL SELECTION): Object
+useSpotlightTracker.ts:2922 🎯 NEW SELECTION: Triggering immediate detection Object
+useSpotlightTracker.ts:2850 🎯 TIMELINE SELECTION: Triggering immediate detection for player selection: Object
+useSpotlightTracker.ts:1751 🎯 DETECTION REQUEST from timeline_selection: Object
+useSpotlightTracker.ts:1819 🚀 EXECUTING detection request from timeline_selection
+useSpotlightTracker.ts:1107 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: Object
+useSpotlightTracker.ts:1229 🖼️ Frame captured: 848×480 at 0.000s
+useSpotlightTracker.ts:1236 🐛 DETECTION TIME DEBUG: Object
+useSpotlightTracker.ts:1248 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+useSpotlightTracker.ts:1253 🔧 DETECTION REQUEST - Including selectedPlayerId: Object
+useSpotlightTracker.ts:1265 ⚠️ Video not ready for capture - waiting for loadeddata Object
+(anonymous) @ useSpotlightTracker.ts:1265
+useSpotlightTracker.ts:2967 🎬🔍 ENHANCED VIDEO IDENTITY VERIFICATION: Object
+useSpotlightTracker.ts:3020 🎬 Player selected - starting tracking system immediately with enhanced debugging
+useSpotlightTracker.ts:3024 🔄 Starting tracking loop (works for both internal and external modes)
+useSpotlightTracker.ts:2628 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+useSpotlightTracker.ts:2629 🎬 startVideoTracking() CALLED
+useSpotlightTracker.ts:2630 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+useSpotlightTracker.ts:2631 📊 STARTUP STATE: Object
+useSpotlightTracker.ts:2681 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+useSpotlightTracker.ts:2682 🔥 INTERNAL MODE - STARTING DETECTION LOOPS
+useSpotlightTracker.ts:2683 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+useSpotlightTracker.ts:2685 ✅ Using requestVideoFrameCallback for video-driven tracking (INTERNAL MODE)
+useSpotlightTracker.ts:2686 🚀 CALLING startUnifiedTrackingLoop()...
+useSpotlightTracker.ts:2056 🛑 UNIFIED LOOP: Disabling all competing timers and loops
+useSpotlightTracker.ts:1662 🧹 CRITICAL CLEANUP: Shutting down 0 active timers to prevent flooding
+useSpotlightTracker.ts:1677 ✅ TIMER CLEANUP COMPLETE: All detection loops stopped
+useSpotlightTracker.ts:2077 🚀 rVFC STARTUP CHECK: Object
+useSpotlightTracker.ts:2117 🚫 rVFC: Video not ready (readyState < 1), cannot start rVFC loop
+(anonymous) @ useSpotlightTracker.ts:2117
+useSpotlightTracker.ts:2688 📋 startUnifiedTrackingLoop() returned: undefined
+useSpotlightTracker.ts:3031 ⚠️ Failed to start tracking loop - requirements not met
+(anonymous) @ useSpotlightTracker.ts:3031
+useSpotlightTracker.ts:3064 🎬 ARCHITECT FIX: Video element detected, setting up rVFC loop on loadedmetadata
+useSpotlightTracker.ts:3093 ⏳ ARCHITECT FIX: Waiting for loadedmetadata event...
+useSpotlightTracker.ts:3121 🔗 ATTACHING VIDEO EVENT LISTENERS: Object
+useSpotlightTracker.ts:3570 🎥 ALL VIDEO ELEMENTS FOUND IN DOM: Array(1)
+useSpotlightTracker.ts:3593 🎥🎥🎥 SPOTLIGHT TRACKER VIDEO ELEMENT CONNECTED 🎥🎥🎥: Object
+useDevLogger.ts:42 [DetectionScheduler] Scheduler disabled Object
+SpotlightOverlay.tsx:1345 ❌ SpotlightOverlay early exit: video dimensions not ready Object
+VideoPreviewPlayer.tsx:61 🎬 VIDEOPREVIEWPLAYER RENDER! Object
+useSpotlightTracker.ts:947 🔥🔥🔥 useSpotlightTracker v2.1 INITIALIZED - BUG FIXED 🔥🔥🔥 Object
+VideoPreviewPlayer.tsx:1099 🎯 OVERLAY VISIBILITY CHECK: Object
+coordinateTransform.ts:48 ⚠️ calculateVideoRenderRect: Zero dimension detected Object
+calculateVideoRenderRect @ coordinateTransform.ts:48
+useSpotlightTracker.ts:3098 🧹 ARCHITECT FIX: Cleaning up video tracking on element change
+useSpotlightTracker.ts:3199 🗑️ REMOVING VIDEO EVENT LISTENERS: Object
+SpotlightOverlay.tsx:59 🔍 SpotlightOverlay RECEIVED selectedPlayer prop: Object
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+useSpotlightTracker.ts:3840 🎯 getBoxByIdAtTime: LIVE PREDICTION for player_3: Object
+SpotlightOverlay.tsx:638 🎯 ID-LOCK DIAGNOSTIC: Object
+SpotlightOverlay.tsx:1785 🎨 PROP CHANGE - calling renderIfNeeded
+SpotlightOverlay.tsx:1345 ❌ SpotlightOverlay early exit: video dimensions not ready Object
+useSpotlightTracker.ts:3064 🎬 ARCHITECT FIX: Video element detected, setting up rVFC loop on loadedmetadata
+useSpotlightTracker.ts:3093 ⏳ ARCHITECT FIX: Waiting for loadedmetadata event...
+useSpotlightTracker.ts:3121 🔗 ATTACHING VIDEO EVENT LISTENERS: Object
+coordinateTransform.ts:48 ⚠️ calculateVideoRenderRect: Zero dimension detected Object
+calculateVideoRenderRect @ coordinateTransform.ts:48
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+SpotlightOverlay.tsx:1785 🎨 PROP CHANGE - calling renderIfNeeded
+SpotlightOverlay.tsx:1345 ❌ SpotlightOverlay early exit: video dimensions not ready Object
+SpotlightOverlay.tsx:1357 🧹 SpotlightOverlay: Early exit - not effective visible
+VideoPreviewPlayer.tsx:753 🔄 PREVIEW: Feeding Timeline detection to tracker Object
+useSpotlightTracker.ts:3224 📥 HighlightLock: Ingested 1 players from external detection
+useSpotlightTracker.ts:3299 ℹ️ HighlightLock already exists, will update with new detections
+HighlightLock.ts:218 ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" Object
+HighlightLock.ts:340 ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=-1760920111.639s
+HighlightLock.ts:378 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): Object
+useSpotlightTracker.ts:3316 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3], detections=1, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+useSpotlightTracker.ts:377 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY Object
+VideoPreviewPlayer.tsx:773 🔗 Forcing tracker rebind to video element
+useSpotlightTracker.ts:3525 🔄 FORCE REBIND: Manual trigger - delegating to auto-rebind
+useSpotlightTracker.ts:3445 🔍 AUTO-REBIND SCAN: Object
+useSpotlightTracker.ts:3513 ⚠️ AUTO-REBIND: No suitable video found: Object
+useSpotlightTracker.ts:3069 ✅ ARCHITECT FIX: Video metadata loaded - starting rVFC loop NOW
+useSpotlightTracker.ts:3074 🚀 ARCHITECT FIX: Calling startVideoTracking() after metadata load
+useSpotlightTracker.ts:2628 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+useSpotlightTracker.ts:2629 🎬 startVideoTracking() CALLED
+useSpotlightTracker.ts:2630 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+useSpotlightTracker.ts:2631 📊 STARTUP STATE: Object
+useSpotlightTracker.ts:2681 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+useSpotlightTracker.ts:2682 🔥 INTERNAL MODE - STARTING DETECTION LOOPS
+useSpotlightTracker.ts:2683 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+useSpotlightTracker.ts:2685 ✅ Using requestVideoFrameCallback for video-driven tracking (INTERNAL MODE)
+useSpotlightTracker.ts:2686 🚀 CALLING startUnifiedTrackingLoop()...
+useSpotlightTracker.ts:2056 🛑 UNIFIED LOOP: Disabling all competing timers and loops
+useSpotlightTracker.ts:1662 🧹 CRITICAL CLEANUP: Shutting down 0 active timers to prevent flooding
+useSpotlightTracker.ts:1677 ✅ TIMER CLEANUP COMPLETE: All detection loops stopped
+useSpotlightTracker.ts:2077 🚀 rVFC STARTUP CHECK: Object
+useSpotlightTracker.ts:2346 🚀 Starting rVFC-driven tracking loop
+useSpotlightTracker.ts:1662 🧹 CRITICAL CLEANUP: Shutting down 0 active timers to prevent flooding
+useSpotlightTracker.ts:1677 ✅ TIMER CLEANUP COMPLETE: All detection loops stopped
+useSpotlightTracker.ts:2514 ⏸️ Video paused but rVFC available - using single-shot detection instead of timer
+useSpotlightTracker.ts:2688 📋 startUnifiedTrackingLoop() returned: function
+useSpotlightTracker.ts:3079 ✅ ARCHITECT FIX: rVFC loop successfully started
+VideoPreviewPlayer.tsx:61 🎬 VIDEOPREVIEWPLAYER RENDER! Object
+useSpotlightTracker.ts:947 🔥🔥🔥 useSpotlightTracker v2.1 INITIALIZED - BUG FIXED 🔥🔥🔥 Object
+VideoPreviewPlayer.tsx:1099 🎯 OVERLAY VISIBILITY CHECK: Object
+SpotlightOverlay.tsx:1923 🧹 [Overlay 57be5d82] Cleaning up video listeners
+SpotlightOverlay.tsx:1934 🗑️ [Overlay 57be5d82] Clearing SVG container on unmount
+SpotlightOverlay.tsx:1654 ⏹️ SpotlightOverlay: Stopping render loop
+SpotlightOverlay.tsx:1796 🎬 SpotlightOverlay: useLayoutEffect MOUNTING - waiting for elements
+SpotlightOverlay.tsx:1804 🔍 SpotlightOverlay: Checking element availability: Object
+SpotlightOverlay.tsx:1816 ✅ SpotlightOverlay: SVG CONTAINER MOUNTED SUCCESSFULLY: Object
+SpotlightOverlay.tsx:1877 🎭 [Overlay 57be5d82] Video initial state: Object
+SpotlightOverlay.tsx:1912 ✅ [Overlay 57be5d82] All listeners attached successfully
+SpotlightOverlay.tsx:59 🔍 SpotlightOverlay RECEIVED selectedPlayer prop: Object
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+useSpotlightTracker.ts:3840 🎯 getBoxByIdAtTime: LIVE PREDICTION for player_3: Object
+SpotlightOverlay.tsx:638 🎯 ID-LOCK DIAGNOSTIC: Object
+SpotlightOverlay.tsx:1785 🎨 PROP CHANGE - calling renderIfNeeded
+SpotlightOverlay.tsx:1386 📐 SpotlightOverlay renderBox computed: Object
+SpotlightOverlay.tsx:1441 🎯 COORDINATE TRANSFORM: Object
+effectRendererSvg.ts:63 🎯 SVG Dynamic sizing: player=71.8px, multiplier=0.8, result=57.5px
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+SpotlightOverlay.tsx:1785 🎨 PROP CHANGE - calling renderIfNeeded
+useSpotlightTracker.ts:2135 🎬 rVFC FRAME 1: Object
+useSpotlightTracker.ts:2153 🔍 rVFC PREDICTION CHECK: Object
+useSpotlightTracker.ts:2168 🎯 rVFC PREDICTION [1]: box=[0.022, 0.449], vel=[0.00000, 0.00000]
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2206 📦 rVFC TRACKING UPDATE: Object
+useSpotlightTracker.ts:2219 🔍 rVFC DETECTION TRIGGER: Object
+useSpotlightTracker.ts:2234 🚀 rVFC: Using centralized detection manager for coordinated requests
+useSpotlightTracker.ts:1751 🎯 DETECTION REQUEST from immediate_rVFC: Object
+useSpotlightTracker.ts:1781 🚀 IMMEDIATE TRIGGER - bypassing throttle for immediate_rVFC: Object
+useSpotlightTracker.ts:1819 🚀 EXECUTING detection request from immediate_rVFC
+useSpotlightTracker.ts:1107 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: Object
+useSpotlightTracker.ts:1229 🖼️ Frame captured: 848×480 at 0.000s
+useSpotlightTracker.ts:1236 🐛 DETECTION TIME DEBUG: Object
+useSpotlightTracker.ts:1248 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+useSpotlightTracker.ts:1253 🔧 DETECTION REQUEST - Including selectedPlayerId: Object
+useSpotlightTracker.ts:1265 ⚠️ Video not ready for capture - waiting for loadeddata Object
+(anonymous) @ useSpotlightTracker.ts:1265
+VideoPreviewPlayer.tsx:61 🎬 VIDEOPREVIEWPLAYER RENDER! Object
+useSpotlightTracker.ts:947 🔥🔥🔥 useSpotlightTracker v2.1 INITIALIZED - BUG FIXED 🔥🔥🔥 Object
+VideoPreviewPlayer.tsx:1099 🎯 OVERLAY VISIBILITY CHECK: Object
+SpotlightOverlay.tsx:59 🔍 SpotlightOverlay RECEIVED selectedPlayer prop: Object
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+useSpotlightTracker.ts:3840 🎯 getBoxByIdAtTime: LIVE PREDICTION for player_3: Object
+SpotlightOverlay.tsx:638 🎯 ID-LOCK DIAGNOSTIC: Object
+useSpotlightTracker.ts:3570 🎥 ALL VIDEO ELEMENTS FOUND IN DOM: Array(1)
+useSpotlightTracker.ts:3593 🎥🎥🎥 SPOTLIGHT TRACKER VIDEO ELEMENT CONNECTED 🎥🎥🎥: Object
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+SpotlightOverlay.tsx:1785 🎨 PROP CHANGE - calling renderIfNeeded
+useSpotlightTracker.ts:3006 ⏰ DIRECT VIDEO EVENT - TIME UPDATE: Object
+SpotlightOverlay.tsx:1845 ⏩ [Overlay 57be5d82] Video SEEKED - restarting render loop
+SpotlightOverlay.tsx:1587 [Overlay 57be5d82] startRenderLoop Object
+SpotlightOverlay.tsx:1621 [Overlay 57be5d82] rVFC scheduled, id: 2
+useSpotlightTracker.ts:1295 🖼️ Creating capture blob... Object
+useSpotlightTracker.ts:1295 🖼️ Creating capture blob... Object
+useSpotlightTracker.ts:1324 ✅ toBlob ok (48ms) | size=101.5 KB
+useSpotlightTracker.ts:1370 🚚 POST replicate start
+useSpotlightTracker.ts:1324 ✅ toBlob ok (19ms) | size=101.5 KB
+useSpotlightTracker.ts:1370 🚚 POST replicate start
+useSpotlightTracker.ts:2369 ⏸️ PAUSED VIDEO DETECTION 1: Object
+useSpotlightTracker.ts:2369 ⏸️ PAUSED VIDEO DETECTION 2: Object
+useSpotlightTracker.ts:2387 🔍 PAUSED DETECTION TRIGGER: Object
+useSpotlightTracker.ts:2396 🚀 PAUSED: Using centralized detection manager for coordinated requests
+useSpotlightTracker.ts:1740 🚫 CONCURRENT REQUEST BLOCKED from paused - another request already in progress Object
+useSpotlightTracker.ts:2401 🎯 PAUSED DETECTION RESULTS: Object
+useSpotlightTracker.ts:2414 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (0 detections)
+useSpotlightTracker.ts:3224 📥 HighlightLock: Ingested 0 players from external detection
+useSpotlightTracker.ts:3299 ℹ️ HighlightLock already exists, will update with new detections
+HighlightLock.ts:411 ❌ HANDLE MISSED DETECTION: masterId="player_3", state="active"
+HighlightLockLogger.ts:89 ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 1016,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:89
+useSpotlightTracker.ts:3316 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[], detections=0, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+useSpotlightTracker.ts:339 🔒 ID-LOCK FREEZE: Holding position for missing player ID "player_3" (frame 1/60)
+useSpotlightTracker.ts:1482 ✅ replicate 200
+useSpotlightTracker.ts:1485 📜 RESPONSE PARSING DEBUG (ALWAYS): Object
+useSpotlightTracker.ts:1508 🔍 YOLOv8 PARSING RESULT (DETAILED): Object
+useSpotlightTracker.ts:1827 ✅ DETECTION SUCCESS from immediate_rVFC: Object
+useSpotlightTracker.ts:1846 💾 CACHED 4 successful detections for fallback
+useSpotlightTracker.ts:1886 🏁 DETECTION REQUEST COMPLETED from immediate_rVFC
+useSpotlightTracker.ts:2237 🎯 rVFC DIRECT DETECTION RESULTS: Object
+useSpotlightTracker.ts:2250 🔗 FEEDING rVFC DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+useSpotlightTracker.ts:3224 📥 HighlightLock: Ingested 4 players from external detection
+useSpotlightTracker.ts:3299 ℹ️ HighlightLock already exists, will update with new detections
+HighlightLock.ts:218 ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" Object
+HighlightLock.ts:340 ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=-5.940s
+HighlightLock.ts:378 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): Object
+HighlightLockLogger.ts:89 ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 683,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:89
+useSpotlightTracker.ts:3316 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+useSpotlightTracker.ts:377 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2259 🎯 rVFC BEFORE tracker.update(): Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2271 🎯 rVFC AFTER tracker.update(): Object
+useSpotlightTracker.ts:2033 📊 DETECTION METRICS [rVFC]: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+VideoPreviewPlayer.tsx:61 🎬 VIDEOPREVIEWPLAYER RENDER! Object
+useSpotlightTracker.ts:947 🔥🔥🔥 useSpotlightTracker v2.1 INITIALIZED - BUG FIXED 🔥🔥🔥 Object
+VideoPreviewPlayer.tsx:1099 🎯 OVERLAY VISIBILITY CHECK: Object
+SpotlightOverlay.tsx:59 🔍 SpotlightOverlay RECEIVED selectedPlayer prop: Object
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+useSpotlightTracker.ts:3840 🎯 getBoxByIdAtTime: LIVE PREDICTION for player_3: Object
+SpotlightOverlay.tsx:638 🎯 ID-LOCK DIAGNOSTIC: Object
+SpotlightOverlay.tsx:766 🎯 SPOTLIGHT: Selected source "anchor" locked for 1000ms
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+useSpotlightTracker.ts:3840 🎯 getBoxByIdAtTime: LIVE PREDICTION for player_3: Object
+SpotlightOverlay.tsx:638 🎯 ID-LOCK DIAGNOSTIC: Object
+SpotlightOverlay.tsx:1785 🎨 PROP CHANGE - calling renderIfNeeded
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+SpotlightOverlay.tsx:1785 🎨 PROP CHANGE - calling renderIfNeeded
+useSpotlightTracker.ts:2369 ⏸️ PAUSED VIDEO DETECTION 3: Object
+useSpotlightTracker.ts:2387 🔍 PAUSED DETECTION TRIGGER: Object
+useSpotlightTracker.ts:2396 🚀 PAUSED: Using centralized detection manager for coordinated requests
+useSpotlightTracker.ts:1751 🎯 DETECTION REQUEST from paused: Object
+useSpotlightTracker.ts:1819 🚀 EXECUTING detection request from paused
+useSpotlightTracker.ts:1107 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: Object
+useSpotlightTracker.ts:1229 🖼️ Frame captured: 848×480 at 0.000s
+useSpotlightTracker.ts:1236 🐛 DETECTION TIME DEBUG: Object
+useSpotlightTracker.ts:1248 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+useSpotlightTracker.ts:1253 🔧 DETECTION REQUEST - Including selectedPlayerId: Object
+useSpotlightTracker.ts:1295 🖼️ Creating capture blob... Object
+useSpotlightTracker.ts:1324 ✅ toBlob ok (7ms) | size=101.5 KB
+useSpotlightTracker.ts:1370 🚚 POST replicate start
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+stageLogger.ts:87 [2025-10-20T00:28:39.766Z] [CreatorDashboard] [INFO] RENDER CHECK: Video Preview stage is rendering | {"hasTimeSelection":true,"hasSelectedPlayer":true,"hasVideoUrl":true}
+creator-dashboard.tsx:1356 🎬 RENDERING VideoPreviewPlayer with props: Object
+VideoPreviewPlayer.tsx:61 🎬 VIDEOPREVIEWPLAYER RENDER! Object
+useSpotlightTracker.ts:947 🔥🔥🔥 useSpotlightTracker v2.1 INITIALIZED - BUG FIXED 🔥🔥🔥 Object
+VideoPreviewPlayer.tsx:1099 🎯 OVERLAY VISIBILITY CHECK: Object
+SpotlightOverlay.tsx:59 🔍 SpotlightOverlay RECEIVED selectedPlayer prop: Object
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+useSpotlightTracker.ts:3840 🎯 getBoxByIdAtTime: LIVE PREDICTION for player_3: Object
+SpotlightOverlay.tsx:638 🎯 ID-LOCK DIAGNOSTIC: Object
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+SpotlightOverlay.tsx:1785 🎨 PROP CHANGE - calling renderIfNeeded
+useSpotlightTracker.ts:1482 ✅ replicate 200
+useSpotlightTracker.ts:1485 📜 RESPONSE PARSING DEBUG (ALWAYS): Object
+useSpotlightTracker.ts:1508 🔍 YOLOv8 PARSING RESULT (DETAILED): Object
+useSpotlightTracker.ts:1827 ✅ DETECTION SUCCESS from timeline_selection: Object
+useSpotlightTracker.ts:1846 💾 CACHED 4 successful detections for fallback
+useSpotlightTracker.ts:1886 🏁 DETECTION REQUEST COMPLETED from timeline_selection
+useSpotlightTracker.ts:2864 🎯 TIMELINE IMMEDIATE DETECTION RESULTS: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2876 🎯 TIMELINE BEFORE tracker.update(): Object
+useSpotlightTracker.ts:377 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2885 🎯 TIMELINE AFTER tracker.update(): Object
+useSpotlightTracker.ts:2905 ✅ TIMELINE SELECTION: Immediate tracking activated!
+useSpotlightTracker.ts:1482 ✅ replicate 200
+useSpotlightTracker.ts:1485 📜 RESPONSE PARSING DEBUG (ALWAYS): Object
+useSpotlightTracker.ts:1508 🔍 YOLOv8 PARSING RESULT (DETAILED): Object
+useSpotlightTracker.ts:1827 ✅ DETECTION SUCCESS from paused: Object
+useSpotlightTracker.ts:1846 💾 CACHED 4 successful detections for fallback
+useSpotlightTracker.ts:1886 🏁 DETECTION REQUEST COMPLETED from paused
+useSpotlightTracker.ts:2401 🎯 PAUSED DETECTION RESULTS: Object
+useSpotlightTracker.ts:2414 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+useSpotlightTracker.ts:3224 📥 HighlightLock: Ingested 4 players from external detection
+useSpotlightTracker.ts:3299 ℹ️ HighlightLock already exists, will update with new detections
+HighlightLock.ts:218 ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" Object
+HighlightLock.ts:340 ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=0.000s
+HighlightLock.ts:378 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): Object
+HighlightLockLogger.ts:89 ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 2342,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:89
+useSpotlightTracker.ts:3316 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+useSpotlightTracker.ts:377 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2423 🎯 PAUSED BEFORE tracker.update(): Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2435 🎯 PAUSED AFTER tracker.update(): Object
+useSpotlightTracker.ts:2033 📊 DETECTION METRICS [paused]: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2469 ✅ PAUSED DETECTION SUCCESS - position updated!
+useSpotlightTracker.ts:2369 ⏸️ PAUSED VIDEO DETECTION 4: Object
+useSpotlightTracker.ts:2387 🔍 PAUSED DETECTION TRIGGER: Object
+useSpotlightTracker.ts:2396 🚀 PAUSED: Using centralized detection manager for coordinated requests
+useSpotlightTracker.ts:1751 🎯 DETECTION REQUEST from paused: Object
+useSpotlightTracker.ts:1819 🚀 EXECUTING detection request from paused
+useSpotlightTracker.ts:1107 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: Object
+useSpotlightTracker.ts:1229 🖼️ Frame captured: 848×480 at 0.000s
+useSpotlightTracker.ts:1236 🐛 DETECTION TIME DEBUG: Object
+useSpotlightTracker.ts:1248 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+useSpotlightTracker.ts:1253 🔧 DETECTION REQUEST - Including selectedPlayerId: Object
+useSpotlightTracker.ts:1295 🖼️ Creating capture blob... Object
+useSpotlightTracker.ts:1324 ✅ toBlob ok (10ms) | size=101.5 KB
+useSpotlightTracker.ts:1370 🚚 POST replicate start
+useSpotlightTracker.ts:1482 ✅ replicate 200
+useSpotlightTracker.ts:1485 📜 RESPONSE PARSING DEBUG (ALWAYS): Object
+useSpotlightTracker.ts:1508 🔍 YOLOv8 PARSING RESULT (DETAILED): Object
+useSpotlightTracker.ts:1827 ✅ DETECTION SUCCESS from paused: Object
+useSpotlightTracker.ts:1846 💾 CACHED 4 successful detections for fallback
+useSpotlightTracker.ts:1886 🏁 DETECTION REQUEST COMPLETED from paused
+useSpotlightTracker.ts:2401 🎯 PAUSED DETECTION RESULTS: Object
+useSpotlightTracker.ts:2414 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+useSpotlightTracker.ts:3224 📥 HighlightLock: Ingested 4 players from external detection
+useSpotlightTracker.ts:3299 ℹ️ HighlightLock already exists, will update with new detections
+HighlightLock.ts:218 ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" Object
+HighlightLock.ts:340 ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=0.000s
+HighlightLock.ts:378 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): Object
+HighlightLockLogger.ts:89 ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 1972,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:89
+useSpotlightTracker.ts:3316 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+useSpotlightTracker.ts:377 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2423 🎯 PAUSED BEFORE tracker.update(): Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2435 🎯 PAUSED AFTER tracker.update(): Object
+useSpotlightTracker.ts:2033 📊 DETECTION METRICS [paused]: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2469 ✅ PAUSED DETECTION SUCCESS - position updated!
+useSpotlightTracker.ts:2369 ⏸️ PAUSED VIDEO DETECTION 5: Object
+useSpotlightTracker.ts:2387 🔍 PAUSED DETECTION TRIGGER: Object
+useSpotlightTracker.ts:2396 🚀 PAUSED: Using centralized detection manager for coordinated requests
+useSpotlightTracker.ts:1751 🎯 DETECTION REQUEST from paused: Object
+useSpotlightTracker.ts:1766 ⏱️ THROTTLING detection request from paused - waiting 28ms
+useSpotlightTracker.ts:1819 🚀 EXECUTING detection request from paused
+useSpotlightTracker.ts:1107 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: Object
+useSpotlightTracker.ts:1229 🖼️ Frame captured: 848×480 at 0.000s
+useSpotlightTracker.ts:1236 🐛 DETECTION TIME DEBUG: Object
+useSpotlightTracker.ts:1248 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+useSpotlightTracker.ts:1253 🔧 DETECTION REQUEST - Including selectedPlayerId: Object
+useSpotlightTracker.ts:1295 🖼️ Creating capture blob... Object
+useSpotlightTracker.ts:1324 ✅ toBlob ok (11ms) | size=101.5 KB
+useSpotlightTracker.ts:1370 🚚 POST replicate start
+useSpotlightTracker.ts:1482 ✅ replicate 200
+useSpotlightTracker.ts:1485 📜 RESPONSE PARSING DEBUG (ALWAYS): Object
+useSpotlightTracker.ts:1508 🔍 YOLOv8 PARSING RESULT (DETAILED): Object
+useSpotlightTracker.ts:1827 ✅ DETECTION SUCCESS from paused: Object
+useSpotlightTracker.ts:1846 💾 CACHED 4 successful detections for fallback
+useSpotlightTracker.ts:1886 🏁 DETECTION REQUEST COMPLETED from paused
+useSpotlightTracker.ts:2401 🎯 PAUSED DETECTION RESULTS: Object
+useSpotlightTracker.ts:2414 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+useSpotlightTracker.ts:3224 📥 HighlightLock: Ingested 4 players from external detection
+useSpotlightTracker.ts:3299 ℹ️ HighlightLock already exists, will update with new detections
+HighlightLock.ts:218 ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" Object
+HighlightLock.ts:340 ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=0.000s
+HighlightLock.ts:378 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): Object
+HighlightLockLogger.ts:89 ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 2001,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:89
+useSpotlightTracker.ts:3316 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+useSpotlightTracker.ts:377 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2423 🎯 PAUSED BEFORE tracker.update(): Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2435 🎯 PAUSED AFTER tracker.update(): Object
+useSpotlightTracker.ts:2033 📊 DETECTION METRICS [paused]: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2469 ✅ PAUSED DETECTION SUCCESS - position updated!
+useSpotlightTracker.ts:2369 ⏸️ PAUSED VIDEO DETECTION 6: Object
+useSpotlightTracker.ts:2387 🔍 PAUSED DETECTION TRIGGER: Object
+useSpotlightTracker.ts:2396 🚀 PAUSED: Using centralized detection manager for coordinated requests
+useSpotlightTracker.ts:1751 🎯 DETECTION REQUEST from paused: Object
+useSpotlightTracker.ts:1766 ⏱️ THROTTLING detection request from paused - waiting 28ms
+useSpotlightTracker.ts:1819 🚀 EXECUTING detection request from paused
+useSpotlightTracker.ts:1107 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: Object
+useSpotlightTracker.ts:1229 🖼️ Frame captured: 848×480 at 0.000s
+useSpotlightTracker.ts:1236 🐛 DETECTION TIME DEBUG: Object
+useSpotlightTracker.ts:1248 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+useSpotlightTracker.ts:1253 🔧 DETECTION REQUEST - Including selectedPlayerId: Object
+useSpotlightTracker.ts:1295 🖼️ Creating capture blob... Object
+useSpotlightTracker.ts:1324 ✅ toBlob ok (9ms) | size=101.5 KB
+useSpotlightTracker.ts:1370 🚚 POST replicate start
+useSpotlightTracker.ts:1482 ✅ replicate 200
+useSpotlightTracker.ts:1485 📜 RESPONSE PARSING DEBUG (ALWAYS): Object
+useSpotlightTracker.ts:1508 🔍 YOLOv8 PARSING RESULT (DETAILED): Object
+useSpotlightTracker.ts:1827 ✅ DETECTION SUCCESS from paused: Object
+useSpotlightTracker.ts:1846 💾 CACHED 4 successful detections for fallback
+useSpotlightTracker.ts:1886 🏁 DETECTION REQUEST COMPLETED from paused
+useSpotlightTracker.ts:2401 🎯 PAUSED DETECTION RESULTS: Object
+useSpotlightTracker.ts:2414 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+useSpotlightTracker.ts:3224 📥 HighlightLock: Ingested 4 players from external detection
+useSpotlightTracker.ts:3299 ℹ️ HighlightLock already exists, will update with new detections
+HighlightLock.ts:218 ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" Object
+HighlightLock.ts:340 ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=0.000s
+HighlightLock.ts:378 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): Object
+HighlightLockLogger.ts:89 ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 1931,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:89
+useSpotlightTracker.ts:3316 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+useSpotlightTracker.ts:377 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2423 🎯 PAUSED BEFORE tracker.update(): Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2435 🎯 PAUSED AFTER tracker.update(): Object
+useSpotlightTracker.ts:2033 📊 DETECTION METRICS [paused]: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2469 ✅ PAUSED DETECTION SUCCESS - position updated!
+useSpotlightTracker.ts:2369 ⏸️ PAUSED VIDEO DETECTION 7: Object
+useSpotlightTracker.ts:2387 🔍 PAUSED DETECTION TRIGGER: Object
+useSpotlightTracker.ts:2396 🚀 PAUSED: Using centralized detection manager for coordinated requests
+useSpotlightTracker.ts:1751 🎯 DETECTION REQUEST from paused: Object
+useSpotlightTracker.ts:1819 🚀 EXECUTING detection request from paused
+useSpotlightTracker.ts:1107 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: Object
+useSpotlightTracker.ts:1229 🖼️ Frame captured: 848×480 at 0.000s
+useSpotlightTracker.ts:1236 🐛 DETECTION TIME DEBUG: Object
+useSpotlightTracker.ts:1248 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+useSpotlightTracker.ts:1253 🔧 DETECTION REQUEST - Including selectedPlayerId: Object
+useSpotlightTracker.ts:1295 🖼️ Creating capture blob... Object
+useSpotlightTracker.ts:1324 ✅ toBlob ok (64800ms) | size=101.5 KB
+useSpotlightTracker.ts:1370 🚚 POST replicate start
+useSpotlightTracker.ts:1482 ✅ replicate 200
+useSpotlightTracker.ts:1485 📜 RESPONSE PARSING DEBUG (ALWAYS): Object
+useSpotlightTracker.ts:1508 🔍 YOLOv8 PARSING RESULT (DETAILED): Object
+useSpotlightTracker.ts:1827 ✅ DETECTION SUCCESS from paused: Object
+useSpotlightTracker.ts:1846 💾 CACHED 4 successful detections for fallback
+useSpotlightTracker.ts:1886 🏁 DETECTION REQUEST COMPLETED from paused
+useSpotlightTracker.ts:2401 🎯 PAUSED DETECTION RESULTS: Object
+useSpotlightTracker.ts:2414 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+useSpotlightTracker.ts:3224 📥 HighlightLock: Ingested 4 players from external detection
+useSpotlightTracker.ts:3299 ℹ️ HighlightLock already exists, will update with new detections
+HighlightLock.ts:218 ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" Object
+HighlightLock.ts:340 ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=0.000s
+HighlightLock.ts:378 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): Object
+HighlightLockLogger.ts:89 ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 68019,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:89
+useSpotlightTracker.ts:3316 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+useSpotlightTracker.ts:377 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2423 🎯 PAUSED BEFORE tracker.update(): Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2435 🎯 PAUSED AFTER tracker.update(): Object
+useSpotlightTracker.ts:2033 📊 DETECTION METRICS [paused]: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2469 ✅ PAUSED DETECTION SUCCESS - position updated!
+useSpotlightTracker.ts:2369 ⏸️ PAUSED VIDEO DETECTION 8: Object
+useSpotlightTracker.ts:2387 🔍 PAUSED DETECTION TRIGGER: Object
+useSpotlightTracker.ts:2396 🚀 PAUSED: Using centralized detection manager for coordinated requests
+useSpotlightTracker.ts:1751 🎯 DETECTION REQUEST from paused: Object
+useSpotlightTracker.ts:1819 🚀 EXECUTING detection request from paused
+useSpotlightTracker.ts:1107 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: Object
+useSpotlightTracker.ts:1229 🖼️ Frame captured: 848×480 at 0.000s
+useSpotlightTracker.ts:1236 🐛 DETECTION TIME DEBUG: Object
+useSpotlightTracker.ts:1248 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+useSpotlightTracker.ts:1253 🔧 DETECTION REQUEST - Including selectedPlayerId: Object
+useSpotlightTracker.ts:1295 🖼️ Creating capture blob... Object
+useSpotlightTracker.ts:1324 ✅ toBlob ok (9ms) | size=101.5 KB
+useSpotlightTracker.ts:1370 🚚 POST replicate start
+SpotlightOverlay.tsx:1357 🧹 SpotlightOverlay: Early exit - not effective visible
+VideoPreviewPlayer.tsx:61 🎬 VIDEOPREVIEWPLAYER RENDER! Object
+useSpotlightTracker.ts:947 🔥🔥🔥 useSpotlightTracker v2.1 INITIALIZED - BUG FIXED 🔥🔥🔥 Object
+VideoPreviewPlayer.tsx:1099 🎯 OVERLAY VISIBILITY CHECK: Object
+SpotlightOverlay.tsx:59 🔍 SpotlightOverlay RECEIVED selectedPlayer prop: Object
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+useSpotlightTracker.ts:3840 🎯 getBoxByIdAtTime: LIVE PREDICTION for player_3: Object
+SpotlightOverlay.tsx:638 🎯 ID-LOCK DIAGNOSTIC: Object
+SpotlightOverlay.tsx:766 🎯 SPOTLIGHT: Selected source "anchor" locked for 1000ms
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+useSpotlightTracker.ts:3840 🎯 getBoxByIdAtTime: LIVE PREDICTION for player_3: Object
+SpotlightOverlay.tsx:638 🎯 ID-LOCK DIAGNOSTIC: Object
+SpotlightOverlay.tsx:1785 🎨 PROP CHANGE - calling renderIfNeeded
+SpotlightOverlay.tsx:439 📦 SPOTLIGHT: liveTrackingBoxRef updated: Object
+SpotlightOverlay.tsx:1785 🎨 PROP CHANGE - calling renderIfNeeded
+useSpotlightTracker.ts:1482 ✅ replicate 200
+useSpotlightTracker.ts:1485 📜 RESPONSE PARSING DEBUG (ALWAYS): Object
+useSpotlightTracker.ts:1508 🔍 YOLOv8 PARSING RESULT (DETAILED): Object
+useSpotlightTracker.ts:1827 ✅ DETECTION SUCCESS from paused: Object
+useSpotlightTracker.ts:1846 💾 CACHED 4 successful detections for fallback
+useSpotlightTracker.ts:1886 🏁 DETECTION REQUEST COMPLETED from paused
+useSpotlightTracker.ts:2401 🎯 PAUSED DETECTION RESULTS: Object
+useSpotlightTracker.ts:2414 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+useSpotlightTracker.ts:3224 📥 HighlightLock: Ingested 4 players from external detection
+useSpotlightTracker.ts:3299 ℹ️ HighlightLock already exists, will update with new detections
+HighlightLock.ts:218 ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" Object
+HighlightLock.ts:340 ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=0.000s
+HighlightLock.ts:378 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): Object
+HighlightLockLogger.ts:89 ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 1968,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:89
+useSpotlightTracker.ts:3316 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+useSpotlightTracker.ts:377 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2423 🎯 PAUSED BEFORE tracker.update(): Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2435 🎯 PAUSED AFTER tracker.update(): Object
+useSpotlightTracker.ts:2033 📊 DETECTION METRICS [paused]: Object
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: Object
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: Object
+useSpotlightTracker.ts:2469 ✅ PAUSED DETECTION SUCCESS - position updated!
+useSpotlightTracker.ts:2369 ⏸️ PAUSED VIDEO DETECTION 9: {videoTime: '0.000', paused: true, readyState: 4, activeTimers: 8}
+useSpotlightTracker.ts:2387 🔍 PAUSED DETECTION TRIGGER: {timeSinceLastDetection: '1969', videoTime: '0.000', reason: 'interval_met'}
+useSpotlightTracker.ts:2396 🚀 PAUSED: Using centralized detection manager for coordinated requests
+useSpotlightTracker.ts:1751 🎯 DETECTION REQUEST from paused: {timeSinceLastRequest: '1969', minInterval: 2000, isRequesting: false, queueLength: 0, videoTime: '0.000', …}
+useSpotlightTracker.ts:1766 ⏱️ THROTTLING detection request from paused - waiting 31ms
+useSpotlightTracker.ts:1819 🚀 EXECUTING detection request from paused
+useSpotlightTracker.ts:1107 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: {timestamp: '0.000', componentName: 'VideoPreviewPlayer', detectionStartTime: 1760920198564, videoState: {…}, videoSelectionFix: false}
+useSpotlightTracker.ts:1229 🖼️ Frame captured: 848×480 at 0.000s
+useSpotlightTracker.ts:1236 🐛 DETECTION TIME DEBUG: {options.detectionTime: 5.938474576271186, options.detectionTime type: 'number', isDefined: true, isNotNull: true, videoCurrentTime: 0, …}
+useSpotlightTracker.ts:1248 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+useSpotlightTracker.ts:1253 🔧 DETECTION REQUEST - Including selectedPlayerId: {selectedPlayerIdFromTracker: 'player_3', selectedPlayerIdFromOptions: 'player_3', finalSelectedPlayerId: 'player_3', timestamp: '0.000'}
+useSpotlightTracker.ts:1295 🖼️ Creating capture blob... {canvasSize: '848x480', videoSize: '848x480', readyState: 4, timestamp: '0.000'}
+useSpotlightTracker.ts:1324 ✅ toBlob ok (11ms) | size=101.5 KB
+useSpotlightTracker.ts:1370 🚚 POST replicate start
+useSpotlightTracker.ts:1482 ✅ replicate 200
+useSpotlightTracker.ts:1485 📜 RESPONSE PARSING DEBUG (ALWAYS): {responseStatus: 200, responseOk: true, dataKeys: Array(7), hasSuccess: true, hasPlayers: true, …}
+useSpotlightTracker.ts:1508 🔍 YOLOv8 PARSING RESULT (DETAILED): {detectedCount: 4, resolution: '848×480', serverSuccess: true, serverTimestamp: 0, serverFrameAnalysis: {…}, …}
+useSpotlightTracker.ts:1827 ✅ DETECTION SUCCESS from paused: {detectionCount: 4, videoTime: '0.000', detections: Array(3), circuitBreakerOpen: false, failureCount: 0}
+useSpotlightTracker.ts:1846 💾 CACHED 4 successful detections for fallback
+useSpotlightTracker.ts:1886 🏁 DETECTION REQUEST COMPLETED from paused
+useSpotlightTracker.ts:2401 🎯 PAUSED DETECTION RESULTS: {detectionCount: 4, videoTime: '0.000', detections: Array(3)}
+useSpotlightTracker.ts:2414 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+useSpotlightTracker.ts:3224 📥 HighlightLock: Ingested 4 players from external detection
+useSpotlightTracker.ts:3299 ℹ️ HighlightLock already exists, will update with new detections
+HighlightLock.ts:218 ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" {center: Array(2), confidence: '0.39'}
+HighlightLock.ts:340 ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=0.000s
+HighlightLock.ts:378 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): {masterId: 'player_3', rawDetection: {…}, finalCenter: {…}, velocity: {…}, confidence: '0.800'}
+HighlightLockLogger.ts:89 ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 1973,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:89
+logDetectionProcessing @ HighlightLockLogger.ts:170
+update @ HighlightLock.ts:176
+(anonymous) @ useSpotlightTracker.ts:3313
+handlePausedDetection @ useSpotlightTracker.ts:2415
+useSpotlightTracker.ts:3316 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+useSpotlightTracker.ts:377 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY {playerBox: {…}, otherPlayersIgnored: 1, lostFrames: 0}
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920199502}
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920199503}
+useSpotlightTracker.ts:2423 🎯 PAUSED BEFORE tracker.update(): {currentTrackerBox: {…}, detectionsReceived: 4, firstDetection: {…}}
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920199503}
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920199503}
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920199503}
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920199503}
+useSpotlightTracker.ts:2435 🎯 PAUSED AFTER tracker.update(): {newTrackerBox: {…}, coordinatesChanged: false, timestamp: 1760920199503}
+useSpotlightTracker.ts:2033 📊 DETECTION METRICS [paused]: {detectionHz: '0.51Hz', avgDetectionHz: '0.09Hz', detectionCount: 8, coordinateDelta: '0.0000, 0.0000', coordinateMovement: '⏸️ STABLE', …}
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920199503}
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920199503}
+useSpotlightTracker.ts:2469 ✅ PAUSED DETECTION SUCCESS - position updated!
+useSpotlightTracker.ts:2369 ⏸️ PAUSED VIDEO DETECTION 10: {videoTime: '0.000', paused: true, readyState: 4, activeTimers: 9}
+useSpotlightTracker.ts:2387 🔍 PAUSED DETECTION TRIGGER: {timeSinceLastDetection: '1973', videoTime: '0.000', reason: 'interval_met'}
+useSpotlightTracker.ts:2396 🚀 PAUSED: Using centralized detection manager for coordinated requests
+useSpotlightTracker.ts:1751 🎯 DETECTION REQUEST from paused: {timeSinceLastRequest: '1941', minInterval: 2000, isRequesting: false, queueLength: 0, videoTime: '0.000', …}
+useSpotlightTracker.ts:1766 ⏱️ THROTTLING detection request from paused - waiting 59ms
+useSpotlightTracker.ts:1819 🚀 EXECUTING detection request from paused
+useSpotlightTracker.ts:1107 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: {timestamp: '0.000', componentName: 'VideoPreviewPlayer', detectionStartTime: 1760920200565, videoState: {…}, videoSelectionFix: false}
+useSpotlightTracker.ts:1229 🖼️ Frame captured: 848×480 at 0.000s
+useSpotlightTracker.ts:1236 🐛 DETECTION TIME DEBUG: {options.detectionTime: 5.938474576271186, options.detectionTime type: 'number', isDefined: true, isNotNull: true, videoCurrentTime: 0, …}
+useSpotlightTracker.ts:1248 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+useSpotlightTracker.ts:1253 🔧 DETECTION REQUEST - Including selectedPlayerId: {selectedPlayerIdFromTracker: 'player_3', selectedPlayerIdFromOptions: 'player_3', finalSelectedPlayerId: 'player_3', timestamp: '0.000'}
+useSpotlightTracker.ts:1295 🖼️ Creating capture blob... {canvasSize: '848x480', videoSize: '848x480', readyState: 4, timestamp: '0.000'}
+useSpotlightTracker.ts:1324 ✅ toBlob ok (7ms) | size=101.5 KB
+useSpotlightTracker.ts:1370 🚚 POST replicate start
+useSpotlightTracker.ts:1482 ✅ replicate 200
+useSpotlightTracker.ts:1485 📜 RESPONSE PARSING DEBUG (ALWAYS): {responseStatus: 200, responseOk: true, dataKeys: Array(7), hasSuccess: true, hasPlayers: true, …}
+useSpotlightTracker.ts:1508 🔍 YOLOv8 PARSING RESULT (DETAILED): {detectedCount: 4, resolution: '848×480', serverSuccess: true, serverTimestamp: 0, serverFrameAnalysis: {…}, …}
+useSpotlightTracker.ts:1827 ✅ DETECTION SUCCESS from paused: {detectionCount: 4, videoTime: '0.000', detections: Array(3), circuitBreakerOpen: false, failureCount: 0}
+useSpotlightTracker.ts:1846 💾 CACHED 4 successful detections for fallback
+useSpotlightTracker.ts:1886 🏁 DETECTION REQUEST COMPLETED from paused
+useSpotlightTracker.ts:2401 🎯 PAUSED DETECTION RESULTS: {detectionCount: 4, videoTime: '0.000', detections: Array(3)}
+useSpotlightTracker.ts:2414 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+useSpotlightTracker.ts:3224 📥 HighlightLock: Ingested 4 players from external detection
+useSpotlightTracker.ts:3299 ℹ️ HighlightLock already exists, will update with new detections
+HighlightLock.ts:218 ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" {center: Array(2), confidence: '0.35'}
+HighlightLock.ts:340 ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=0.000s
+HighlightLock.ts:378 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): {masterId: 'player_3', rawDetection: {…}, finalCenter: {…}, velocity: {…}, confidence: '0.800'}
+HighlightLockLogger.ts:89 ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 2017,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:89
+logDetectionProcessing @ HighlightLockLogger.ts:170
+update @ HighlightLock.ts:176
+(anonymous) @ useSpotlightTracker.ts:3313
+handlePausedDetection @ useSpotlightTracker.ts:2415
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:2478
+useSpotlightTracker.ts:3316 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+useSpotlightTracker.ts:377 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY {playerBox: {…}, otherPlayersIgnored: 1, lostFrames: 0}
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920201519}
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920201519}
+useSpotlightTracker.ts:2423 🎯 PAUSED BEFORE tracker.update(): {currentTrackerBox: {…}, detectionsReceived: 4, firstDetection: {…}}
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920201519}
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920201519}
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920201519}
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920201520}
+useSpotlightTracker.ts:2435 🎯 PAUSED AFTER tracker.update(): {newTrackerBox: {…}, coordinatesChanged: false, timestamp: 1760920201520}
+useSpotlightTracker.ts:2033 📊 DETECTION METRICS [paused]: {detectionHz: '0.50Hz', avgDetectionHz: '0.10Hz', detectionCount: 9, coordinateDelta: '0.0000, 0.0000', coordinateMovement: '⏸️ STABLE', …}
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920201520}
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920201520}
+useSpotlightTracker.ts:2469 ✅ PAUSED DETECTION SUCCESS - position updated!
+useSpotlightTracker.ts:2369 ⏸️ PAUSED VIDEO DETECTION 11: {videoTime: '0.000', paused: true, readyState: 4, activeTimers: 10}
+useSpotlightTracker.ts:2387 🔍 PAUSED DETECTION TRIGGER: {timeSinceLastDetection: '2017', videoTime: '0.000', reason: 'interval_met'}
+useSpotlightTracker.ts:2396 🚀 PAUSED: Using centralized detection manager for coordinated requests
+useSpotlightTracker.ts:1751 🎯 DETECTION REQUEST from paused: {timeSinceLastRequest: '1957', minInterval: 2000, isRequesting: false, queueLength: 0, videoTime: '0.000', …}
+useSpotlightTracker.ts:1766 ⏱️ THROTTLING detection request from paused - waiting 43ms
+useSpotlightTracker.ts:1819 🚀 EXECUTING detection request from paused
+useSpotlightTracker.ts:1107 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: {timestamp: '0.000', componentName: 'VideoPreviewPlayer', detectionStartTime: 1760920202565, videoState: {…}, videoSelectionFix: false}
+useSpotlightTracker.ts:1229 🖼️ Frame captured: 848×480 at 0.000s
+useSpotlightTracker.ts:1236 🐛 DETECTION TIME DEBUG: {options.detectionTime: 5.938474576271186, options.detectionTime type: 'number', isDefined: true, isNotNull: true, videoCurrentTime: 0, …}
+useSpotlightTracker.ts:1248 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+useSpotlightTracker.ts:1253 🔧 DETECTION REQUEST - Including selectedPlayerId: {selectedPlayerIdFromTracker: 'player_3', selectedPlayerIdFromOptions: 'player_3', finalSelectedPlayerId: 'player_3', timestamp: '0.000'}
+useSpotlightTracker.ts:1295 🖼️ Creating capture blob... {canvasSize: '848x480', videoSize: '848x480', readyState: 4, timestamp: '0.000'}
+useSpotlightTracker.ts:1324 ✅ toBlob ok (9ms) | size=101.5 KB
+useSpotlightTracker.ts:1370 🚚 POST replicate start
+useSpotlightTracker.ts:1482 ✅ replicate 200
+useSpotlightTracker.ts:1485 📜 RESPONSE PARSING DEBUG (ALWAYS): {responseStatus: 200, responseOk: true, dataKeys: Array(7), hasSuccess: true, hasPlayers: true, …}
+useSpotlightTracker.ts:1508 🔍 YOLOv8 PARSING RESULT (DETAILED): {detectedCount: 4, resolution: '848×480', serverSuccess: true, serverTimestamp: 0, serverFrameAnalysis: {…}, …}
+useSpotlightTracker.ts:1827 ✅ DETECTION SUCCESS from paused: {detectionCount: 4, videoTime: '0.000', detections: Array(3), circuitBreakerOpen: false, failureCount: 0}
+useSpotlightTracker.ts:1846 💾 CACHED 4 successful detections for fallback
+useSpotlightTracker.ts:1886 🏁 DETECTION REQUEST COMPLETED from paused
+useSpotlightTracker.ts:2401 🎯 PAUSED DETECTION RESULTS: {detectionCount: 4, videoTime: '0.000', detections: Array(3)}
+useSpotlightTracker.ts:2414 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+useSpotlightTracker.ts:3224 📥 HighlightLock: Ingested 4 players from external detection
+useSpotlightTracker.ts:3299 ℹ️ HighlightLock already exists, will update with new detections
+HighlightLock.ts:218 ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" {center: Array(2), confidence: '0.31'}
+HighlightLock.ts:340 ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=0.000s
+HighlightLock.ts:378 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): {masterId: 'player_3', rawDetection: {…}, finalCenter: {…}, velocity: {…}, confidence: '0.800'}
+HighlightLockLogger.ts:89 ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 1993,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:89
+logDetectionProcessing @ HighlightLockLogger.ts:170
+update @ HighlightLock.ts:176
+(anonymous) @ useSpotlightTracker.ts:3313
+handlePausedDetection @ useSpotlightTracker.ts:2415
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:2478
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:2478
+useSpotlightTracker.ts:3316 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+useSpotlightTracker.ts:377 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY {playerBox: {…}, otherPlayersIgnored: 1, lostFrames: 0}
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920203513}
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920203513}
+useSpotlightTracker.ts:2423 🎯 PAUSED BEFORE tracker.update(): {currentTrackerBox: {…}, detectionsReceived: 4, firstDetection: {…}}
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920203513}
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920203513}
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920203513}
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920203513}
+useSpotlightTracker.ts:2435 🎯 PAUSED AFTER tracker.update(): {newTrackerBox: {…}, coordinatesChanged: false, timestamp: 1760920203514}
+useSpotlightTracker.ts:2033 📊 DETECTION METRICS [paused]: {detectionHz: '0.50Hz', avgDetectionHz: '0.11Hz', detectionCount: 10, coordinateDelta: '0.0000, 0.0000', coordinateMovement: '⏸️ STABLE', …}
+useSpotlightTracker.ts:669 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920203514}
+useSpotlightTracker.ts:677 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920203514}
+ ✅ PAUSED DETECTION SUCCESS - position updated!
+ ⏸️ PAUSED VIDEO DETECTION 12: {videoTime: '0.000', paused: true, readyState: 4, activeTimers: 11}
+ 🔍 PAUSED DETECTION TRIGGER: {timeSinceLastDetection: '2986', videoTime: '0.000', reason: 'interval_met'}
+ 🚀 PAUSED: Using centralized detection manager for coordinated requests
+ 🎯 DETECTION REQUEST from paused: {timeSinceLastRequest: '2943', minInterval: 2000, isRequesting: false, queueLength: 0, videoTime: '0.000', …}
+ 🚀 EXECUTING detection request from paused
+ 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: {timestamp: '0.000', componentName: 'VideoPreviewPlayer', detectionStartTime: 1760920205508, videoState: {…}, videoSelectionFix: false}
+ 🖼️ Frame captured: 848×480 at 0.000s
+ 🐛 DETECTION TIME DEBUG: {options.detectionTime: 5.938474576271186, options.detectionTime type: 'number', isDefined: true, isNotNull: true, videoCurrentTime: 0, …}
+ 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+ 🔧 DETECTION REQUEST - Including selectedPlayerId: {selectedPlayerIdFromTracker: 'player_3', selectedPlayerIdFromOptions: 'player_3', finalSelectedPlayerId: 'player_3', timestamp: '0.000'}
+ 🖼️ Creating capture blob... {canvasSize: '848x480', videoSize: '848x480', readyState: 4, timestamp: '0.000'}
+ ✅ toBlob ok (1058ms) | size=101.5 KB
+ 🚚 POST replicate start
+ ✅ replicate 200
+ 📜 RESPONSE PARSING DEBUG (ALWAYS): {responseStatus: 200, responseOk: true, dataKeys: Array(7), hasSuccess: true, hasPlayers: true, …}
+ 🔍 YOLOv8 PARSING RESULT (DETAILED): {detectedCount: 4, resolution: '848×480', serverSuccess: true, serverTimestamp: 0, serverFrameAnalysis: {…}, …}
+ ✅ DETECTION SUCCESS from paused: {detectionCount: 4, videoTime: '0.000', detections: Array(3), circuitBreakerOpen: false, failureCount: 0}
+ 💾 CACHED 4 successful detections for fallback
+ 🏁 DETECTION REQUEST COMPLETED from paused
+ 🎯 PAUSED DETECTION RESULTS: {detectionCount: 4, videoTime: '0.000', detections: Array(3)}
+ 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+ 📥 HighlightLock: Ingested 4 players from external detection
+ ℹ️ HighlightLock already exists, will update with new detections
+ ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" {center: Array(2), confidence: '0.28'}
+ ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=0.000s
+ 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): {masterId: 'player_3', rawDetection: {…}, finalCenter: {…}, velocity: {…}, confidence: '0.800'}
+ ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 4107,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:47
+logDetectionProcessing @ HighlightLockLogger.ts:115
+update @ HighlightLock.ts:99
+(anonymous) @ useSpotlightTracker.ts:2365
+handlePausedDetection @ useSpotlightTracker.ts:1691
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:1738
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:1738
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:1738
+ 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+ 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY {playerBox: {…}, otherPlayersIgnored: 1, lostFrames: 0}
+ 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920207619}
+ 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920207620}
+ 🎯 PAUSED BEFORE tracker.update(): {currentTrackerBox: {…}, detectionsReceived: 4, firstDetection: {…}}
+ 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920207620}
+ 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920207620}
+ 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920207620}
+ 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920207620}
+ 🎯 PAUSED AFTER tracker.update(): {newTrackerBox: {…}, coordinatesChanged: false, timestamp: 1760920207620}
+ 📊 DETECTION METRICS [paused]: {detectionHz: '0.24Hz', avgDetectionHz: '0.11Hz', detectionCount: 11, coordinateDelta: '0.0000, 0.0000', coordinateMovement: '⏸️ STABLE', …}
+ 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920207620}
+ 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920207620}
+ ✅ PAUSED DETECTION SUCCESS - position updated!
+ ⏸️ PAUSED VIDEO DETECTION 13: {videoTime: '0.000', paused: true, readyState: 4, activeTimers: 12}
+ 🔍 PAUSED DETECTION TRIGGER: {timeSinceLastDetection: '3114', videoTime: '0.000', reason: 'interval_met'}
+ 🚀 PAUSED: Using centralized detection manager for coordinated requests
+ 🎯 DETECTION REQUEST from paused: {timeSinceLastRequest: '3113', minInterval: 2000, isRequesting: false, queueLength: 0, videoTime: '0.000', …}
+ 🚀 EXECUTING detection request from paused
+ 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: {timestamp: '0.000', componentName: 'VideoPreviewPlayer', detectionStartTime: 1760920208621, videoState: {…}, videoSelectionFix: false}
+ 🖼️ Frame captured: 848×480 at 0.000s
+ 🐛 DETECTION TIME DEBUG: {options.detectionTime: 5.938474576271186, options.detectionTime type: 'number', isDefined: true, isNotNull: true, videoCurrentTime: 0, …}
+ 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+ 🔧 DETECTION REQUEST - Including selectedPlayerId: {selectedPlayerIdFromTracker: 'player_3', selectedPlayerIdFromOptions: 'player_3', finalSelectedPlayerId: 'player_3', timestamp: '0.000'}
+ 🖼️ Creating capture blob... {canvasSize: '848x480', videoSize: '848x480', readyState: 4, timestamp: '0.000'}
+ ✅ toBlob ok (8ms) | size=101.5 KB
+ 🚚 POST replicate start
+ ✅ replicate 200
+ 📜 RESPONSE PARSING DEBUG (ALWAYS): {responseStatus: 200, responseOk: true, dataKeys: Array(7), hasSuccess: true, hasPlayers: true, …}
+ 🔍 YOLOv8 PARSING RESULT (DETAILED): {detectedCount: 4, resolution: '848×480', serverSuccess: true, serverTimestamp: 0, serverFrameAnalysis: {…}, …}
+ ✅ DETECTION SUCCESS from paused: {detectionCount: 4, videoTime: '0.000', detections: Array(3), circuitBreakerOpen: false, failureCount: 0}
+ 💾 CACHED 4 successful detections for fallback
+ 🏁 DETECTION REQUEST COMPLETED from paused
+ 🎯 PAUSED DETECTION RESULTS: {detectionCount: 4, videoTime: '0.000', detections: Array(3)}
+ 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+ 📥 HighlightLock: Ingested 4 players from external detection
+ ℹ️ HighlightLock already exists, will update with new detections
+ ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" {center: Array(2), confidence: '0.25'}
+ ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=0.000s
+ 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): {masterId: 'player_3', rawDetection: {…}, finalCenter: {…}, velocity: {…}, confidence: '0.800'}
+ ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 1938,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:47
+logDetectionProcessing @ HighlightLockLogger.ts:115
+update @ HighlightLock.ts:99
+(anonymous) @ useSpotlightTracker.ts:2365
+handlePausedDetection @ useSpotlightTracker.ts:1691
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:1738
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:1738
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:1738
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:1738
+ 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+ 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY {playerBox: {…}, otherPlayersIgnored: 1, lostFrames: 0}
+ 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920209558}
+ 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920209558}
+ 🎯 PAUSED BEFORE tracker.update(): {currentTrackerBox: {…}, detectionsReceived: 4, firstDetection: {…}}
+ 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920209558}
+ 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920209558}
+ 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920209558}
+ 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920209558}
+ 🎯 PAUSED AFTER tracker.update(): {newTrackerBox: {…}, coordinatesChanged: false, timestamp: 1760920209558}
+ 📊 DETECTION METRICS [paused]: {detectionHz: '0.52Hz', avgDetectionHz: '0.12Hz', detectionCount: 12, coordinateDelta: '0.0000, 0.0000', coordinateMovement: '⏸️ STABLE', …}
+ 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920209558}
+ 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920209558}
+ ✅ PAUSED DETECTION SUCCESS - position updated!
+ ⏸️ PAUSED VIDEO DETECTION 14: {videoTime: '0.000', paused: true, readyState: 4, activeTimers: 13}
+ 🔍 PAUSED DETECTION TRIGGER: {timeSinceLastDetection: '1939', videoTime: '0.000', reason: 'interval_met'}
+ 🚀 PAUSED: Using centralized detection manager for coordinated requests
+ 🎯 DETECTION REQUEST from paused: {timeSinceLastRequest: '1939', minInterval: 2000, isRequesting: false, queueLength: 0, videoTime: '0.000', …}
+ ⏱️ THROTTLING detection request from paused - waiting 61ms
+ 🚫 THROTTLE still active after wait - falling back to cache from paused
+ 🔄 ATTEMPTING CACHE FALLBACK from paused: {videoTime: '0.000', hasLocalCache: true, videoId: '611d40c9-9427-4d8a-86c8-858f80493643'}
+ ✅ SERVER CACHE HIT: Retrieved 4 cached players from server
+ 🎯 PAUSED DETECTION RESULTS: {detectionCount: 4, videoTime: '0.000', detections: Array(3)}
+ 🔗 FEEDING PAUSED DETECTIONS TO HIGHLIGHTLOCK SYSTEM (4 detections)
+ 📥 HighlightLock: Ingested 4 players from external detection
+ ℹ️ HighlightLock already exists, will update with new detections
+ ✅ EXACT ID MATCH: detectionId="player_3" matches masterId="player_3" {center: Array(2), confidence: '0.25'}
+ ✅ HANDLE SUCCESSFUL MATCH: detectionId="player_3", masterId="player_3", deltaTime=0.000s
+ 🎯 SMOOTH TRACKING UPDATE (SINGLE LAYER): {masterId: 'player_3', rawDetection: {…}, finalCenter: {…}, velocity: {…}, confidence: '0.800'}
+ ⚠️ HighlightLock: HIGH_DETECTION_LATENCY {
+  "latency": 1115,
+  "threshold": 500,
+  "possibleCauses": [
+    "Network issues",
+    "CPU overload",
+    "Detection service lag"
+  ]
+}
+log @ HighlightLockLogger.ts:47
+logDetectionProcessing @ HighlightLockLogger.ts:115
+update @ HighlightLock.ts:99
+(anonymous) @ useSpotlightTracker.ts:2365
+handlePausedDetection @ useSpotlightTracker.ts:1691
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:1738
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:1738
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:1738
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:1738
+setTimeout
+handlePausedDetection @ useSpotlightTracker.ts:1738
+ 📥 DETECTION UPDATE: masterId="player_3", detectionIds=[player_3, player_1, player_2, player_3], detections=4, vel before=[0.00000, 0.00000], vel after=[0.00000, 0.00000]
+ 🔒 HARD ID-LOCK: Found player "player_3" - using EXCLUSIVELY {playerBox: {…}, otherPlayersIgnored: 1, lostFrames: 0}
+ 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920210672}
+ 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920210672}
+ 🎯 PAUSED BEFORE tracker.update(): {currentTrackerBox: {…}, detectionsReceived: 4, firstDetection: {…}}
+ 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920210672}
+ 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920210672}
+ 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920210672}
+ 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920210672}
+ 🎯 PAUSED AFTER tracker.update(): {newTrackerBox: {…}, coordinatesChanged: false, timestamp: 1760920210673}
+ 📊 DETECTION METRICS [paused]: {detectionHz: '0.90Hz', avgDetectionHz: '0.13Hz', detectionCount: 13, coordinateDelta: '0.0000, 0.0000', coordinateMovement: '⏸️ STABLE', …}
+ 🔒 ID-LOCK ENFORCED: Assigning selected player ID to tracking box: {trackingBoxId: 'player_3', selectedPlayerId: 'player_3', coordinates: {…}, timestamp: 1760920210673}
+ 📦 Tracker.getBox() returning TRACKED BOX: {lastBox: {…}, lostFrames: 0, confidence: 1, assignedId: 'player_3', timestamp: 1760920210673}
+ ✅ PAUSED DETECTION SUCCESS - position updated!
+ ⏸️ PAUSED VIDEO DETECTION 15: {videoTime: '0.000', paused: true, readyState: 4, activeTimers: 14}
+ 🔍 PAUSED DETECTION TRIGGER: {timeSinceLastDetection: '1114', videoTime: '0.000', reason: 'interval_met'}
+ 🚀 PAUSED: Using centralized detection manager for coordinated requests
+ 🎯 DETECTION REQUEST from paused: {timeSinceLastRequest: '3053', minInterval: 2000, isRequesting: false, queueLength: 0, videoTime: '0.000', …}
+ 🚀 EXECUTING detection request from paused
+ 🎯🎯🎯 DETECTION METRICS: Starting detection request 🎯🎯🎯: {timestamp: '0.000', componentName: 'VideoPreviewPlayer', detectionStartTime: 1760920211674, videoState: {…}, videoSelectionFix: false}
+ 🖼️ Frame captured: 848×480 at 0.000s
+ 🐛 DETECTION TIME DEBUG: {options.detectionTime: 5.938474576271186, options.detectionTime type: 'number', isDefined: true, isNotNull: true, videoCurrentTime: 0, …}
+ 📊 FRAME TIMING CHECK: VIDEO time: 0.000s (0ms), paused: true
+ 🔧 DETECTION REQUEST - Including selectedPlayerId: {selectedPlayerIdFromTracker: 'player_3', selectedPlayerIdFromOptions: 'player_3', finalSelectedPlayerId: 'player_3', timestamp: '0.000'}
+ 🖼️ Creating capture blob... {canvasSize: '848x480', videoSize: '848x480', readyState: 4, timestamp: '0.000'}
+ ✅ toBlob ok (15ms) | size=101.5 KB
+ 🚚 POST replicate start

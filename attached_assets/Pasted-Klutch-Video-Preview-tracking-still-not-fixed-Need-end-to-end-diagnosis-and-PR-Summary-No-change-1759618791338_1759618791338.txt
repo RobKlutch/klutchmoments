@@ -1,0 +1,59 @@
+Klutch Video Preview tracking still not fixed. Need end-to-end diagnosis and PR.
+
+Summary
+
+No change after the last fix. In Video Preview, tracking initializes on the selected player but the highlight either stays fixed in one position or detaches and does not follow movement.
+
+We need an end-to-end review to confirm the source of tracking (Replicate YOLOv11 only), the data flow into the client, and the binding of the highlight to the live track.
+
+Repro
+
+Timeline: pause on a frame, click Detect Players, select a player.
+
+Effects: confirm highlight centers on the selected player in the frozen frame.
+
+Video Preview: press play.
+
+Observe: the highlight remains static or drifts, does not stay locked to the selected player. A white crash screen may appear after playback ends or when moving to the next stage.
+
+Expected
+
+Video Preview tracking starts at the Timeline selection timestamp and follows the selected player continuously via Replicate YOLOv11.
+
+The highlight overlays the tracked box for that same player every frame.
+
+No crash after playback. No fallback overlay.
+
+Actual
+
+Tracker initializes, then the highlight does not follow the player. At times it appears statically locked.
+
+Occasional white crash screen after playback or on advancing to the next stage.
+
+Key questions to answer
+
+Is Video Preview using Replicate YOLOv11 exclusively, or is any local/HOG tracker active?
+
+Is the highlight reading from the live tracked box each frame, or from an initial snapshot or cached coordinates?
+
+Are there two targeting or tracking passes running in Video Preview that race each other?
+
+Why does the system crash after playback or on stage transition?
+
+Areas to inspect
+
+Client
+
+Where tracking updates are ingested in Video Preview. Confirm the component that draws the highlight reads from the same state that receives track updates.
+
+Any secondary scheduler or effect in Video Preview that triggers detection or tracking again. Remove duplicates.
+
+Any code path that sets a static “manual lock” or persists a fixed position instead of per-frame track data.
+
+Memoization and dependency arrays around detectedPlayers, selectedPlayer, previewTracks, and detectionSource.
+
+Server
+
+Confirm only the external Replicate routes are used in this stage. No internal loops.
+
+If “EXTERNAL MODE ACTIVE” appears, verify that detections and tracks are still published to the client on each update.

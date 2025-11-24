@@ -1,0 +1,103 @@
+Regression confirmed. Spotlight rendering at t=0 and not attaching at activation. Requesting final gating, timebase, and reset fixes.
+
+Team,
+
+I re-tested with the HUD. The same issues persist, plus the t=0 pop-in has returned.
+
+Evidence from HUD (screenshot attached)
+
+currentVideoTime: 0.000s, clipStartOffset: 0.000s, sampleTime: 0.000s
+
+selectedActivationTime: 6.016s
+
+selectedPlayerId: player_13, trackingBoxId: player_13, ID Match: YES
+
+boxTimestamp: 0.000s
+
+hasValidBoxForSelected: YES
+
+isSpotlightActive: YES at t=0
+
+What this proves
+
+The overlay activates at t=0 even though activation is 6.016s. Gating is still incorrect in Preview.
+
+The track lookup is sampling timestamp 0.000s and never advancing with playback.
+
+State from Timeline appears to leak into Preview (manual selection status or initial position) without a hard reset on stage entry.
+
+Required fixes (actionable)
+
+Correct the gating expression in Preview
+Use a single function for both HUD and renderer:
+
+const t = videoRef.current?.currentTime ?? 0;
+const sampleTime = t + clipStartOffset;
+
+const box = getBoxByIdAtTime(selectedPlayerId, sampleTime, { interpolate: true, window: 1/30 });
+const hasValidBoxForSelected = Boolean(box);
+
+const canActivateByTime   = sampleTime + EPS >= selectedActivationTime;
+const canActivateByManual = manualSelectionInPreview && hasValidBoxForSelected;
+
+const isSpotlightActive =
+  hasSelectedPlayer &&
+  (canActivateByTime || canActivateByManual) &&
+  hasValidBoxForSelected;
+
+
+Notes:
+
+manualSelectionInPreview must only be true for clicks in the Preview stage. Do not carry over Timeline’s manual flag.
+
+Remove any residual fallbacks such as || !!trackingBox or alternative “effectiveVisibility” paths.
+
+Advance the timebase per frame
+
+Read video.currentTime inside the same requestAnimationFrame loop used for drawing.
+
+Assert sampleTime increases while playing; if not, log an error and skip draw.
+
+Per-frame ID→box join by time
+
+Lookup the selected ID at sampleTime; do not default to index 0.
+
+If no box exists briefly, freeze last valid position for N frames, then hide. No proximity fallback while selected.
+
+Hard reset on stage entry and on selection change
+
+Reset: manualSelectionInPreview=false, lastBox=null, framesSinceLastValid=0, smoothing state, freeze flags, and any timers.
+
+Require a fresh join to the track using selectedActivationTime or a new manual selection in Preview.
+
+Single source of truth and assertions
+
+Use the same computed isSpotlightActive for both HUD and renderer.
+
+If HUD boolean differs from the renderer’s boolean, log an error with all inputs.
+
+HUD fields to verify (enable by default)
+
+currentVideoTime, clipStartOffset, sampleTime
+
+selectedActivationTime
+
+selectedPlayerId, trackingBoxId, ID Match
+
+boxTimestamp and |boxTimestamp − sampleTime|
+
+hasValidBoxForSelected, freezeActive, framesSinceLastValid
+
+Final isSpotlightActive actually used by the renderer
+
+Acceptance criteria to close
+
+No overlay at t=0 unless the user manually selects in Preview at t=0.
+
+Overlay appears only at selectedActivationTime or on manual selection in Preview, and then follows only the selected player smoothly.
+
+Quantitative: IoU ≥ 0.6 for ≥ 95% of frames over a 10-second clip at 1080p; max positional error ≤ 20 px; zero frames drawn outside the selected player while a valid box exists.
+
+Provide a 20–30 s screen recording with the HUD showing sampleTime and boxTimestamp advancing and trackingBoxId === selectedPlayerId throughout. Include commit SHAs.
+
+This remains a blocker. Please apply the above, confirm ownership, and share the verification recording.

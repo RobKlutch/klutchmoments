@@ -1,0 +1,248 @@
+1) Bogging due to flooding
+
+Likely causes
+
+Multiple RAF loops active at once
+
+Duplicate event listeners on play, pause, seek, resize
+
+Tracker polling interval overlapping with RAF writes
+
+Excessive state churn or logging inside RAF
+
+Canvas and DOM overlay both rendering the same effect each frame
+
+Immediate diagnostics
+
+Add a global render owner token and loop counter. Log once at mount and once at unmount:
+
+activeLoops, loopOwnerSessionId
+
+Use Performance panel to verify there is exactly one RAF callback recurring
+
+Log listener counts per event type after mount
+
+Sample FPS and dropped frames every 2 seconds
+
+Hardening fixes
+
+Single owner loop
+
+let rafId = null, loopOwner = null;
+function startLoop(sessionId) {
+  if (loopOwner === sessionId) return;
+  stopLoop(); loopOwner = sessionId;
+  const tick = () => { if (loopOwner !== sessionId) return; renderFrame(); rafId = requestAnimationFrame(tick); };
+  rafId = requestAnimationFrame(tick);
+}
+function stopLoop() { if (rafId) cancelAnimationFrame(rafId); rafId = null; }
+
+
+Centralized dispose
+
+Create preview.dispose() that removes overlays, cancels RAF, clears timers, removes all listeners
+
+Call dispose() on:
+
+leaving Preview
+
+clicking Start New Highlight
+
+starting a new sessionId
+
+Listener registry
+
+const listeners = [];
+function on(el, ev, fn) { el.addEventListener(ev, fn); listeners.push([el, ev, fn]); }
+function removeAll() { for (const [el, ev, fn] of listeners) el.removeEventListener(ev, fn); listeners.length = 0; }
+
+
+Tracker cadence
+
+Keep tracker inference or polling on its existing cadence
+
+Drive visual updates only from RAF
+
+Never run a setInterval that also mutates overlay position
+
+Thin RAF
+
+No logging in RAF except every N frames
+
+Avoid setState in RAF. Write directly to canvas or a single ref-backed DOM node
+
+One renderer
+
+Use either canvas or DOM overlay, not both simultaneously
+
+Acceptance criteria
+
+Exactly one RAF loop alive per session
+
+Listeners count does not grow across stage transitions
+
+55 to 60 FPS on a 1080p test clip on your MacBook
+
+No CPU spikes when paused or tabbed away
+
+2) Player #3 preselected on new upload
+
+What is happening
+
+Despite “session isolation” and “clean restarts,” the Timeline stage is reading a cached selection and applying it to the new session
+
+Root causes to check
+
+Hydration order: state from storage re-applies before you branch on Start New Highlight
+
+Namespace collision: keys like selectedPlayerId stored without namespacing by sessionId
+
+Default value source: Timeline mounts with a default selected index when no selection exists
+
+Persisted preview payload: Effects or Preview writes back a player selection that Timeline reads on next run
+
+Fixes
+
+Strong namespacing
+
+All persisted keys include sessionId and stage
+
+Example keys:
+
+klutch:{sessionId}:timeline:selectedPlayerId
+
+klutch:{sessionId}:effects:config
+
+Fresh instance guarantees
+
+On Upload success, generate a new sessionId and broadcast a “sessionChanged” event
+
+Every stage listens for sessionChanged, calls dispose(), clears in-memory caches, and reinitializes to pristine state
+
+Guarded hydration
+
+Do not hydrate Timeline selection automatically
+
+Timeline initial state must be:
+
+no player selected
+
+Detect Players must run at the paused frame before selection is possible
+
+Start New Highlight
+
+Must:
+
+call dispose() for every active stage
+
+clear only keys for the current sessionId
+
+create a new sessionId
+
+Never load state from the previous session into the new session by default
+
+Customer vs Admin persistence policy
+
+Add a workflowMode flag: "customer" or "admin"
+
+customer mode: persistence off by default for user selections, on only for crash recovery within the same sessionId
+
+admin mode: optional persistence for debugging
+
+Enforce at a single gate so no stage can override it
+
+Verification checklist
+
+Start New Highlight creates a new sessionId and Timeline renders with no player selected
+
+No read of any key that does not contain the current sessionId substring
+
+Selecting a player writes to a session-scoped key and clears on new session
+
+Refreshing the page in customer mode within the same session keeps the current work only if you explicitly want crash recovery
+
+Minimal tests Replit can run today
+
+Flooding tests
+
+Put counters in startLoop and stopLoop. After 10 play/pause cycles, activeLoops must be 1
+
+Add an assertion that listeners.length returns to 0 on dispose
+
+Selection tests
+
+After clicking Start New Highlight, check that:
+
+localStorage keys that include the old sessionId are removed or ignored
+
+selectedPlayerId is undefined until the user runs Detect Players and clicks a box
+
+Suggested small code diffs
+
+Session-scoped storage helper
+
+function store(sessionId) {
+  const p = `klutch:${sessionId}:`;
+  return {
+    get: k => JSON.parse(localStorage.getItem(p + k) || 'null'),
+    set: (k, v) => localStorage.setItem(p + k, JSON.stringify(v)),
+    clearAll: () => Object.keys(localStorage)
+      .filter(k => k.startsWith(p))
+      .forEach(k => localStorage.removeItem(k)),
+  };
+}
+
+
+Timeline initial state
+
+function initTimeline(sessionId, mode) {
+  // customer mode: do not auto-hydrate a previous selection
+  state.selectedPlayerId = null;
+  state.detected = [];
+  // user must run Detect Players and select a box each time
+}
+
+
+Start New Highlight
+
+function startNewHighlight() {
+  preview.dispose();
+  effects.dispose();
+  timeline.dispose();
+
+  const old = state.sessionId;
+  const newId = crypto.randomUUID();
+  store(old).clearAll();
+
+  state = { sessionId: newId, stage: 'Upload' };
+  window.dispatchEvent(new CustomEvent('sessionChanged', { detail: { sessionId: newId } }));
+}
+
+
+Single overlay renderer
+
+const overlayEl = document.getElementById('overlay');
+function renderOverlay(rect) {
+  overlayEl.style.left = rect.x + 'px';
+  overlayEl.style.top  = rect.y + 'px';
+  overlayEl.style.width  = rect.w + 'px';
+  overlayEl.style.height = rect.h + 'px';
+}
+
+Final expected behavior
+
+Timeline
+
+No player is preselected on a new upload
+
+User must run Detect Players, then choose a player
+
+Preview
+
+One RAF loop drives updates
+
+Overlay is invisible until the first valid bbox for the selected player at or after the start timestamp
+
+Overlay tracks smoothly, with correct coordinates and zero drift
+
+Pausing stops RAF, resuming restarts it, and leaving the stage disposes everything

@@ -1,0 +1,80 @@
+robert [ ~ ]$ # Delete and recreate with the Python app (fastest approach)
+az containerapp delete --name klutch-cpu-test --resource-group klutch-cpu-test --yes
+
+# Create new one with Python FastAPI
+az containerapp create \
+  --name klutch-cpu-test \
+  --resource-group klutch-cpu-test \
+  --environment klutch-env \
+  --image python:3.11-slim \
+  --target-port 8000 \
+  --ingress external \
+  --cpu 1.0 \
+  --memory 2Gi \
+  --command 'bash' \
+  --args '-c' 'pip install fastapi uvicorn torch opencv-python-headless && python -c "
+from fastapi import FastAPI
+import uvicorn, torch, time
+
+app = FastAPI()
+
+@app.get(\"/\")
+def root():
+    return {\"message\": \"Klutch CPU Test API Ready\"}
+
+@app.get(\"/health\")
+def health():
+    return {
+        \"status\": \"healthy\",
+        \"mode\": \"cpu-testing\",
+        \"gpu_available\": False,
+        \"torch_version\": torch.__version__
+    }
+
+@app.post(\"/api/detect-players\")
+def detect():
+    start = time.time()
+    time.sleep(0.1)
+    processing_time = (time.time() - start) * 1000
+    return {
+        \"success\": True,
+        \"players\": [{\"id\": 1, \"x\": 320, \"y\": 240}],
+" > app.py && python app.py'0.0\", port=8000)
+Containerapp successfully deleted
+unrecognized arguments: -c pip install fastapi uvicorn torch opencv-python-headless && python -c "
+from fastapi import FastAPI
+import uvicorn, torch, time
+
+app = FastAPI()
+
+@app.get(\"/\")
+def root():
+    return {\"message\": \"Klutch CPU Test API Ready\"}
+
+@app.get(\"/health\")
+def health():
+    return {
+        \"status\": \"healthy\",
+        \"mode\": \"cpu-testing\",
+        \"gpu_available\": False,
+        \"torch_version\": torch.__version__
+    }
+
+@app.post(\"/api/detect-players\")
+def detect():
+    start = time.time()
+    time.sleep(0.1)
+    processing_time = (time.time() - start) * 1000
+    return {
+        \"success\": True,
+        \"players\": [{\"id\": 1, \"x\": 320, \"y\": 240}],
+        \"processing_time\": processing_time
+    }
+
+uvicorn.run(app, host=\"0.0.0.0\", port=8000)
+" > app.py && python app.py
+
+Examples from AI knowledge base:
+https://aka.ms/cli_ref
+Read more about the command in reference docs
+robert [ ~ ]$ 

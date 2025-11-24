@@ -1,0 +1,289 @@
+Preselected players and white-screen crashes are symptoms of architectural gaps, not just isolated bugs. Below is a clear plan that fixes today’s issues and sets a durable architecture for Klutch.
+
+A. Immediate Issues To Fix
+1) Timeline shows a preselected player
+
+Likely cause
+
+Residual state hydration or cross-session cache.
+
+Default selection logic running before “Detect Players” completes.
+
+Keys not namespaced per session or not cleared on new upload.
+
+Fix
+
+Enforce a “no selection” invariant on Timeline mount for any new session.
+
+Only allow selection after a fresh Detect run at the current timestamp.
+
+Scope all persisted keys by sessionId and stage.
+
+Do not auto-hydrate selectedPlayerId in Customer workflow.
+
+Reference implementation
+
+// Session-scoped storage
+function sessionStore(sessionId: string) {
+  const p = `klutch:${sessionId}:`;
+  return {
+    get: (k: string) => JSON.parse(localStorage.getItem(p + k) || "null"),
+    set: (k: string, v: any) => localStorage.setItem(p + k, JSON.stringify(v)),
+    clearAll: () => Object.keys(localStorage).filter(k => k.startsWith(p)).forEach(localStorage.removeItem.bind(localStorage))
+  };
+}
+
+// Timeline mount
+function initTimeline(ctx: Ctx) {
+  // Hard reset selection every time for a new session
+  ctx.state.selectedPlayerId = null;
+  ctx.state.detected = [];
+  ctx.ui.setSelectEnabled(false);  // until Detect finishes
+
+  // Do not read any previous selection here
+  // Customers must re-run Detect and select a player
+}
+
+
+Blocking guard
+
+// Before enabling Next from Timeline
+invariant(ctx.state.selectedPlayerId !== null, "Select a player after running Detect Players.");
+
+2) White screen crash on Timeline
+
+Likely cause
+
+Uncaught exception in RAF or event handler.
+
+React error boundary missing or not covering the Timeline tree.
+
+Accessing null video refs or empty detection arrays.
+
+Fix
+
+Add a global error boundary and a stage-local boundary with recovery UI.
+
+Wrap RAF tick, tracker reads, and coordinate transforms in try/catch with throttled error reporting.
+
+Add a watchdog that tears down and restarts the stage on fatal exceptions.
+
+React boundary
+
+class StageErrorBoundary extends React.Component { 
+  state = { hasError: false, info: null as any };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error: any, info: any) { logError("Timeline", error, info); }
+  render() { 
+    if (this.state.hasError) return <CrashPanel stage="Timeline" onRetry={this.props.onRetry} />;
+    return this.props.children;
+  }
+}
+
+
+Defensive RAF
+
+function safeRAF(tick: () => void) {
+  let id = 0;
+  const wrap = () => {
+    try { tick(); }
+    catch (e) { reportOnce("raf.timeline", e); /* stop loop here */ return; }
+    id = requestAnimationFrame(wrap);
+  };
+  id = requestAnimationFrame(wrap);
+  return () => cancelAnimationFrame(id);
+}
+
+B. Clean Architecture For The Klutch Workflow
+1) Authoritative state machine
+
+Use a single workflow controller that manages stage transitions and guarantees invariants.
+
+Stages
+Upload -> Timeline -> Effects -> Preview -> Processing -> Export
+
+State machine rules
+
+A stage can only advance if its preconditions are satisfied.
+
+Each stage receives an immutable “contract payload” from the previous stage.
+
+All contracts are validated at entry.
+
+Types
+
+type SessionId = string;
+
+type UploadOut = {
+  sessionId: SessionId;
+  videoId: string;
+  meta: { width: number; height: number; fps: number; durationMs: number };
+};
+
+type TimelineOut = {
+  sessionId: SessionId;
+  videoId: string;
+  startMs: number;
+  endMs: number;
+  playerSeedBox: { cx: number; cy: number; w: number; h: number }; // at startMs
+};
+
+type EffectsOut = {
+  sessionId: SessionId;
+  videoId: string;
+  effect: { type: string; radius: number; intensity: number; color: string; opacity: number; durationMs: number };
+};
+
+type PreviewIn = UploadOut & TimelineOut & EffectsOut;
+
+
+Validation
+
+function validatePreviewInput(p: Partial<PreviewIn>): asserts p is PreviewIn {
+  invariant(!!p.sessionId && !!p.videoId, "Missing session or video");
+  invariant(Number.isFinite(p.startMs) && Number.isFinite(p.endMs), "Invalid segment");
+  invariant(p.effect && typeof p.effect.type === "string", "Missing effect");
+  invariant(p.playerSeedBox && p.playerSeedBox.w > 0, "Missing player seed box");
+}
+
+2) Session isolation and lifecycle
+
+New upload creates a new sessionId.
+
+The controller emits sessionChanged(sessionId).
+
+All stages subscribe, call dispose(), clear in-memory state, and ignore any storage not prefixed with the current sessionId.
+
+“Start New Highlight” clears only the current session namespace, then issues a new sessionId.
+
+3) Persistence policy by mode
+
+Customer mode: no cross-session hydration of selections or effects.
+
+Admin mode: optional hydration for debugging, but must be opt-in via a visible toggle.
+
+4) Tracker identity lock that survives reindexing
+
+Store a seed bbox at startMs from Timeline.
+
+On Preview start, reacquire the subject by nearest bbox to the seed for the first N frames, then adopt the live track ID.
+
+Do not assume tracker indices are stable across stages.
+
+function reacquireSubject(seed: Box, detected: Box[]): number | null {
+  // return index of nearest center to seed center
+}
+
+5) Rendering contract
+
+One authoritative transform from normalized video coordinates to the painted video rectangle.
+
+Overlay visibility is gated by “first valid bbox” for the subject at or after startMs.
+
+Exactly one renderer runs at a time. Either DOM overlay or canvas, not both.
+
+6) Error handling and recovery
+
+Global logger with error codes including stage, sessionId, videoId, and a short payload hash.
+
+Stage watchdog that shows a non-blocking banner on soft errors and a Crash Panel with Retry on hard errors.
+
+Per-stage dispose() always cancels RAF, removes listeners, nulls refs, and clears stage-scoped timers.
+
+C. Concrete Checklists
+Timeline stage checklist
+
+On mount for a new sessionId:
+
+selectedPlayerId = null
+
+detected = []
+
+“Next” disabled
+
+“Detect Players”:
+
+Runs inference for the current paused frame
+
+Renders boxes and enables selection
+
+Selecting a player:
+
+Sets selectedPlayerId for current sessionId only
+
+Emits a valid playerSeedBox in normalized center format
+
+Leaving the stage:
+
+Persist only TimelineOut under klutch:{sessionId}:timeline:out
+
+Dispose:
+
+Cancel any RAFs
+
+Remove listeners
+
+Clear stage refs
+
+Preview stage checklist
+
+Validate PreviewIn before starting
+
+Seek to startMs, wait for canplay, warmup tracker, reacquire subject using playerSeedBox
+
+Arm overlay only after first valid bbox
+
+On pause, stop RAF. On unmount, dispose everything
+
+If no bbox for 500 ms after start, show a user-visible hint and keep trying silently
+
+D. Tests To Run Today
+
+Preselection regression
+
+Start New Highlight
+
+Verify selectedPlayerId is null on Timeline before Detect
+
+Attempt to click Next without Detect or selection and confirm the guard blocks
+
+Crash resilience
+
+Throw a synthetic error inside Timeline RAF and confirm the Crash Panel appears and Retry works without a full page reload
+
+Session isolation
+
+Complete a selection, then Start New Highlight
+
+Confirm no keys under klutch:{newSessionId}: contain selectedPlayerId
+
+Preview visibility
+
+Log the first two seconds: startMs, firstValidBBoxAtMs, overlayVisible=true moment
+
+Verify the overlay stays hidden until the first valid bbox is received
+
+E. Small but decisive diffs
+
+Disable hydration for Customer mode on Timeline
+
+if (ctx.mode === "customer") {
+  // do not read persisted selectedPlayerId on mount
+} else {
+  // admin optional hydration, behind a toggle
+}
+
+
+Guard against default selection
+
+// Remove any code like:
+state.selectedPlayerId = detected[0]?.id;
+// and replace with an explicit user action requirement
+
+
+Global dispose contract
+
+interface Stage {
+  init(ctx: Ctx): void;
+  dispose(): void;  // cancels RAF, timers, listeners, clears refs
+}

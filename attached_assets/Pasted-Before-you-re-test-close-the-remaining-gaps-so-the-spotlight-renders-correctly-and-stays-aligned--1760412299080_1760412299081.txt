@@ -1,0 +1,120 @@
+Before you re-test, close the remaining gaps so the spotlight renders correctly and stays aligned.
+
+Critical follow-ups to complete now
+
+Match the canvas to the painted video rect
+Your HUD still shows a mismatch:
+
+contentRect: 734×412.875
+
+canvas: 848×480
+
+If the loop runs with this mismatch, the effect will be offset. Size once on mount and on resize.
+
+function sizeCanvasToContent(videoEl: HTMLVideoElement) {
+  const r = getPaintedVideoRect(videoEl);       // letterbox compensated CSS rect
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.style.width  = `${r.width}px`;
+  canvas.style.height = `${r.height}px`;
+  canvas.width  = Math.max(1, Math.round(r.width  * dpr));
+  canvas.height = Math.max(1, Math.round(r.height * dpr));
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+
+Call once after videoReady and on window resize.
+
+Keep absolute timebase for lookups
+Confirm you are querying with absolute media time, not clip-local.
+
+// rVFC path
+const tAbsMs = Math.round(meta.mediaTime * 1000);
+const bbox = tracker.getBoxByIdAtTime(trackId, tAbsMs, { toleranceMs: 40 });
+
+
+Never stop the loop inside renderAtAbsTime
+Gate visibility, but always return quickly and let the callback re-arm.
+
+function renderAtAbsTime(tAbsMs: number) {
+  const tClip = tAbsMs - clipStartOffsetMs;
+  const inWindow = tClip >= segment.startMs && tClip <= segment.endMs;
+  if (!inWindow) { overlay.hide(); return; }
+
+  const bbox = tracker.getBoxByIdAtTime(trackId, tAbsMs, { toleranceMs: 40 });
+  if (!bbox || bbox.w <= 0 || bbox.h <= 0) { overlay.hide(); return; }
+
+  const vRect = getPaintedVideoRect(videoEl);
+  const rect  = normCenterToTopLeftAbsolute(bbox, vRect);
+  overlay.show();
+  overlay.render(effectConfig, rect);
+}
+
+
+Prove you are bound to the on-screen <video>
+Log once on start and show in HUD.
+
+overlayId (8 chars)
+
+videoSrc (video.currentSrc)
+
+loopBackend (rVFC or RAF)
+
+If HUD shows these but the console does not, you still have an instance mismatch.
+
+Verify Timeline selection path
+You will not see a spotlight if the Timeline handler never ran. Confirm on every click:
+
+handlePlayerSelect CALLED
+
+SANITIZED PLAYER for workflow state
+
+playerSeedBox present at startMs
+
+What you should see on a good run
+
+HUD
+
+rAFStarted: YES
+
+aRAFFrameCount incrementing every frame
+
+loopBackend: rVFC on modern Chrome
+
+canvas ≈ contentRect × dpr after sizing
+
+boxTimestamp − sampleTime ≈ 0s
+
+final isSpotlightActive: YES
+
+Visuals
+
+If paused at a frame with a bbox at startMs, effect visible and aligned.
+
+On Play, spotlight tracks the player smoothly to endMs.
+
+Window resize keeps alignment.
+
+Quick test script
+
+Hard refresh. Enter Video Preview, do not press Play.
+
+If bbox(startMs) exists, effect is visible while paused.
+
+HUD shows non-null selectedActivationTime.
+
+Press Play.
+
+HUD: rAFStarted: YES, aRAFFrameCount increases.
+
+Spotlight follows the player.
+
+Seek before activation. Effect hides. Seek after activation. Effect reappears and tracks.
+
+Resize the browser.
+
+HUD canvas values update to match contentRect × dpr.
+
+Spotlight remains aligned.
+
+If any one of these fails, share the HUD fields overlayId, loopBackend, rAFStarted, aRAFFrameCount, videoSrc, contentRect, canvas, and a one-line console excerpt at Play showing your [Overlay <id>] startRenderLoop log. That will pinpoint whether the remaining issue is surface sizing, instance wiring, or timebase alignment.

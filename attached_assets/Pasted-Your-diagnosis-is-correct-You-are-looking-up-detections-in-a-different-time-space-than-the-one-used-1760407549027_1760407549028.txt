@@ -1,0 +1,122 @@
+Your diagnosis is correct. You are looking up detections in a different time space than the one used to store them. That explains a static or “frozen” spotlight even when tracking is valid.
+
+Below is a precise fix and guardrails so this cannot regress.
+
+Problem
+
+Writer path (detector/tracker) stores boxes keyed by absolute media time
+t_abs_ms = session/master media timeline
+
+Reader path (Video Preview) queries by clip-local time
+t_clip_ms = current playback within [startMs, endMs]
+
+Since t_abs_ms ≠ t_clip_ms, lookups miss and you fall back to the seed/anchor.
+
+Fix: unify on a single timebase
+
+Adopt absolute media time end-to-end for storage and lookup. Convert clip-local → absolute at the call site.
+
+Required data
+
+clipStartOffsetMs for the segment
+(absolute time where the clip’s start maps on the master timeline)
+
+Render tick change (Preview)
+// Inputs available in Preview
+// segment: { startMs: number; endMs: number }        // clip-local
+// clipStartOffsetMs: number                           // absolute offset
+// video.currentTime -> seconds within the clip
+
+const t_clip_ms = Math.round(video.currentTime * 1000);
+const t_abs_ms  = clipStartOffsetMs + t_clip_ms;      // single source of truth
+
+const bbox = tracker.getBoxByIdAtTime(trackId, t_abs_ms, { toleranceMs: 40 });
+
+Writer path contract (Tracker)
+
+Store detections with timestamp_ms = absolute_media_time_ms.
+
+Maintain a time-sorted array per trackId for O(log n) binary search.
+
+// storage shape
+detectionsByTrackId: Map<string, Array<{ t_ms: number; box: Box }>>;
+
+Lookup function
+function getBoxByIdAtTime(trackId: string, t_abs_ms: number, opt?: {toleranceMs?: number}) {
+  const arr = detectionsByTrackId.get(trackId);
+  if (!arr || arr.length === 0) return null;
+  const i = lowerBound(arr, t_abs_ms, (a, t) => a.t_ms - t);
+  const tol = opt?.toleranceMs ?? 40; // ~2 frames at 50 fps
+
+  // choose nearest neighbor within tolerance
+  const candidates = [arr[i], arr[i-1]].filter(Boolean);
+  let best = null, bestΔ = Infinity;
+  for (const c of candidates) {
+    const Δ = Math.abs(c.t_ms - t_abs_ms);
+    if (Δ < bestΔ) { best = c; bestΔ = Δ; }
+  }
+  return bestΔ <= tol ? best.box : null;
+}
+
+HUD and instrumentation updates
+
+Add explicit fields to verify timebase alignment at runtime.
+
+currentVideoTime (clip-local, s)
+
+clipStartOffset (s)
+
+sampleTime (clip-local, s)
+
+absQueryTime (s) = clipStartOffset + sampleTime
+
+lastDetAbsTime (s) for the returned bbox
+
+absDelta (ms) = |lastDetAbsTime - absQueryTime|
+
+Warn if absDelta > toleranceMs, and hide the effect instead of showing a stale position.
+
+One-time backfill and compatibility
+
+Until all callers are migrated, make getBoxByIdAtTime resilient:
+
+// Try absolute first, then fall back to clip-local if caller passed that by mistake
+const boxAbs = getBoxByIdAtTime(trackId, t_abs_ms);
+if (boxAbs) return boxAbs;
+
+// Fallback path (deprecated):
+const boxClip = getBoxByIdAtTime(trackId, t_clip_ms + fallbackClipBaseMs);
+
+
+Log a deprecation warning when the fallback path is taken so you can remove it later.
+
+Acceptance criteria
+
+At any paused frame:
+
+absQueryTime equals clipStartOffset + sampleTime in HUD.
+
+A valid bbox returns with absDelta ≤ toleranceMs.
+
+Spotlight renders exactly on the player. No static anchor.
+
+During playback:
+
+Spotlight tracks smoothly across the entire segment.
+
+No frames render with a stale bbox when absDelta > toleranceMs; overlay hides until a valid bbox is found.
+
+No code path calls getBoxByIdAtTime with clip-local time directly.
+
+Optional but recommended
+
+Use HTMLVideoElement.requestVideoFrameCallback and its mediaTime if available. mediaTime is already in seconds on the media timeline, which maps cleanly to your absolute timebase:
+
+video.requestVideoFrameCallback((now, meta) => {
+  const t_abs_ms = Math.round(meta.mediaTime * 1000);
+  const bbox = tracker.getBoxByIdAtTime(trackId, t_abs_ms, { toleranceMs: 40 });
+  // render...
+});
+
+
+This eliminates drift between decoded frames and RAF.

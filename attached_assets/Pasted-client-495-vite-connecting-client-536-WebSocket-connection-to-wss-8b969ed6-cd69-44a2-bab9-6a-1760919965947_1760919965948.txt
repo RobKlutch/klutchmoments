@@ -1,0 +1,38 @@
+client:495 [vite] connecting...
+client:536 WebSocket connection to 'wss://8b969ed6-cd69-44a2-bab9-6a60b5fe5e49-00-2w3dsgm78y30z.worf.replit.dev/?token=VKFdJTY6RixI' failed: 
+setupWebSocket @ client:536
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=VKFdJTY6RixI' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+chunk-WERSD76P.js?v=910b9b73:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+stageLogger.ts:87 [2025-10-20T00:24:57.097Z] [CreatorDashboard] [INFO] StageLogger initialized | {"stageName":"CreatorDashboard"}
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:134 🆔 Generated brand new session ID for first upload: 5902c4b6-9654-4f6b-aa46-32f31eb397f6
+VideoUpload.tsx:58 Video selected: Alex Goal 2.mp4 1.9MB
+creator-dashboard.tsx:146 🧹 Backend tracking reset for session: Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+CombinedClipPlayer.tsx:201 ⚠️ SEEK EFFECT TRIGGERED: Object
+CombinedClipPlayer.tsx:189 🔍 COMBINED_CLIP_PLAYER PROPS: Object
+CombinedClipPlayer.tsx:291 🚫 TIMELINE: Automatic keyframe detection DISABLED (manual clicks only)
+CombinedClipPlayer.tsx:889 Video loaded, actual duration: 10.2
+CombinedClipPlayer.tsx:230 🎯 PERFORMING VIDEO SEEK: Object
+CombinedClipPlayer.tsx:237 🚀 INITIAL SEEK APPLIED in CombinedClipPlayer: Object
+creator-dashboard.tsx:179 🎯 handleTimeSelection CALLED: Object
+creator-dashboard.tsx:181 🎯 handleTimeSelection - Previous timeSelection: null
+creator-dashboard.tsx:187 🎯 handleTimeSelection - New timeSelection: Object
+CombinedClipPlayer.tsx:488 🎯 SELECTION DRAG COMPLETE: Triggering API detection at time: 5.100
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:179 🎯 handleTimeSelection CALLED: Object
+creator-dashboard.tsx:181 🎯 handleTimeSelection - Previous timeSelection: Object
+creator-dashboard.tsx:187 🎯 handleTimeSelection - New timeSelection: Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+CombinedClipPlayer.tsx:336 🎯 TIMELINE CLICK: Triggering API detection at time: 5.973
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+creator-dashboard.tsx:273 🔍 DETECTION RESPONSE: Object
+creator-dashboard.tsx:317 🔍 NORMALIZED PLAYER: Object
+creator-dashboard.tsx:327 🔍 STATE UPDATE: Object
+CombinedClipPlayer.tsx:357 ✅ TIMELINE CLICK: API detection completed
+creator-dashboard.tsx:349 🔍 NEW STATE: Object
+creator-dashboard.tsx:1310 🔍 VIDEO PREVIEW STAGE CHECK: Object
+CombinedClipPlayer.tsx:189 🔍 COMBINED_CLIP_PLAYER PROPS: Object

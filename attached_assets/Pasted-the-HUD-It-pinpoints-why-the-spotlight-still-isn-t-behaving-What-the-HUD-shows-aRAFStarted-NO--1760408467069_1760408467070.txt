@@ -1,0 +1,126 @@
+the HUD. It pinpoints why the spotlight still isn’t behaving.
+
+What the HUD shows
+
+aRAFStarted: NO, aRAFFrameCount: 0
+The render loop that drives the overlay is not running.
+
+currentVideoTime ≈ 7.31s, selectedActivationTime ≈ 5.986s
+Timebase is advancing and we are past activation.
+
+hasValidBoxForSelected: YES, ID Match: YES, boxTimestamp == sampleTime
+Tracking data is present and time-aligned.
+
+final isSpotlightActive: YES
+Logic thinks the effect should be visible.
+
+contentRect: 734×412.875, canvas: 848×480, dpr: 2.0
+Canvas size does not match the painted video rect, which will cause misalignment even after the loop runs.
+
+In short: tracking is ready and activation is true, but the per-frame renderer never starts; and the canvas is sized to a different surface than the video.
+
+What to fix now
+1) Start exactly one frame-synced render loop
+
+Prefer requestVideoFrameCallback (rVFC); fall back to RAF if unavailable.
+
+let rvfcId: number | null = null;
+let rafId: number | null = null;
+
+function startRender() {
+  if (rvfcId || rafId) return;
+
+  if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+    const step = (_now: number, meta: VideoFrameCallbackMetadata) => {
+      renderAtAbsTime(Math.round(meta.mediaTime * 1000)); // frame-accurate
+      rvfcId = video.requestVideoFrameCallback(step);
+    };
+    rvfcId = video.requestVideoFrameCallback(step);
+  } else {
+    const tick = () => {
+      renderAtAbsTime(clipStartOffsetMs + Math.round(video.currentTime * 1000));
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+  }
+  hud.set('aRAFStarted', 'YES');
+}
+
+function stopRender() {
+  if (rvfcId) { video.cancelVideoFrameCallback(rvfcId); rvfcId = null; }
+  if (rafId)  { cancelAnimationFrame(rafId); rafId = null; }
+}
+
+video.addEventListener('play',   startRender);
+video.addEventListener('seeked', startRender);
+video.addEventListener('pause',  stopRender);
+video.addEventListener('ended',  stopRender);
+
+
+Increment aRAFFrameCount inside renderAtAbsTime so the HUD proves frames are being rendered.
+
+2) Render function (timebase + gating + drawing)
+function renderAtAbsTime(tAbsMs: number) {
+  // Gate by activation window
+  const tClipMs = tAbsMs - clipStartOffsetMs;
+  const within = tClipMs >= segment.startMs && tClipMs <= segment.endMs;
+  if (!within) { overlay.hide(); return; }
+
+  const bbox = tracker.getBoxByIdAtTime(trackId, tAbsMs, { toleranceMs: 40 });
+  const hasBBox = bbox && bbox.w > 0 && bbox.h > 0;
+  if (!hasBBox) { overlay.hide(); return; }
+
+  const vRect = getPaintedVideoRect(videoEl);       // letterbox compensated
+  const rect  = normCenterToTopLeftAbsolute(bbox, vRect); // one transform
+  overlay.show();
+  overlay.render(effectConfig, rect);
+  hud.inc('aRAFFrameCount');
+}
+
+3) Make the canvas match the painted video rect
+function sizeCanvasToContent() {
+  const r = getPaintedVideoRect(videoEl); // 734×412.875 in your HUD
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.style.width  = `${r.width}px`;
+  canvas.style.height = `${r.height}px`;
+  canvas.width  = Math.max(1, Math.round(r.width  * dpr));
+  canvas.height = Math.max(1, Math.round(r.height * dpr));
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  hud.set('contentRect', `${r.width}×${r.height}`);
+  hud.set('canvas', `${canvas.width}×${canvas.height}`);
+}
+
+
+Call this on Preview init and on resize.
+
+4) Keep the “one-transform” rule
+
+All tracker boxes should stay in normalized video space. Per frame, map once to vRect. Do not add letterbox offsets twice.
+
+5) HUD signals to verify
+
+aRAFStarted: YES and aRAFFrameCount increasing while playing.
+
+absQueryTime equals clipStartOffset + sampleTime.
+
+canvas equals contentRect * dpr.
+
+When paused at a frame with a valid bbox, overlay visible; when scrubbing before activation, overlay hidden.
+
+Why your current behavior persists
+
+The capture/Replicate fixes improved detection reliability, but the overlay renderer is never driven because the loop is not started.
+
+Even if you start the loop, the canvas mismatch would misplace the effect.
+
+Acceptance criteria
+
+Play Preview: HUD shows aRAFStarted: YES; aRAFFrameCount increments; spotlight tracks the player smoothly.
+
+Pause on a frame with a bbox: spotlight remains accurately positioned.
+
+Resize the window: canvas resets to match contentRect; alignment preserved.
+
+No more static “frozen” effect; no drift to the right.

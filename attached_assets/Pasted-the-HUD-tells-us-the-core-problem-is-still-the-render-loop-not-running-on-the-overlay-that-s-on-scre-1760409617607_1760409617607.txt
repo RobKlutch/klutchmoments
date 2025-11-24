@@ -1,0 +1,121 @@
+the HUD tells us the core problem is still the render loop not running on the overlay that’s on-screen, plus a lingering canvas/contentRect mismatch.
+
+What the HUD proves
+
+rAFStarted: NO, rAFFrameCount: 0 → the overlay instance shown in this HUD is not rendering frames.
+
+Tracking and gating are fine: hasValidBoxForSelected: YES, ID Match: YES, selectedActivationTime < currentVideoTime, final isSpotlightActive: YES.
+
+Surface mismatch: contentRect 734×412.875 vs canvas 848×480 → even when the loop runs, alignment will drift.
+
+This combination points to instance/element wiring, not tracking:
+
+The loop is starting in a different instance (or bound to a different <video>) than the HUD/canvas you’re looking at.
+
+The overlay canvas is sized to the intrinsic video, not the painted video rect.
+
+Fix order (implementation-ready)
+1) Prove single, correct instance is mounted
+
+Add IDs and counts to disambiguate instances.
+
+// On SpotlightOverlay mount/unmount
+const overlayId = crypto.randomUUID();
+console.info('[Overlay] mount', { overlayId });
+hud.set('overlayId', overlayId);
+
+useEffect(() => () => {
+  console.info('[Overlay] unmount', { overlayId });
+}, []);
+
+
+Log also on the render loop start:
+
+console.info('[Overlay] startRender', { overlayId, backend: loopBackend, videoSrc: video.currentSrc });
+
+
+Acceptance: exactly one [Overlay] mount and one [Overlay] startRender for the visible overlay; HUD shows the same overlayId.
+
+2) Bind the loop to the exact displayed <video> element
+
+rVFC/RAF must use the same videoEl the user sees. Add this assert:
+
+hud.set('videoSrc', video.currentSrc || '(none)');
+hud.set('videoReady', String(video.readyState));
+
+
+If videoSrc in HUD doesn’t match the playing element’s currentSrc, you’re listening to the wrong element or a stale ref.
+
+3) Make the loop self-rearming in the same instance
+
+Inside the callback, always re-arm and increment the HUD counter even on “no-draw” frames.
+
+const step = (_now: number, meta: VideoFrameCallbackMetadata) => {
+  try {
+    renderAtAbsTime(Math.round(meta.mediaTime * 1000));
+  } catch (e) {
+    hud.set('lastRenderError', String((e as Error).message || e));
+  } finally {
+    hud.inc('aRAFFrameCount');             // prove the callback executes
+    rvfcId = video.requestVideoFrameCallback(step);
+  }
+};
+rvfcId = video.requestVideoFrameCallback(step);
+hud.set('rAFStarted', 'YES');
+
+
+If aRAFFrameCount stays at 0, the callback isn’t firing at all for this instance.
+
+4) Size the canvas to the painted video rectangle
+
+Fix the mismatch that will cause misalignment once frames render.
+
+function sizeCanvasToContent() {
+  const r = getPaintedVideoRect(videoEl);      // letterbox-compensated rect in CSS px
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.style.width  = `${r.width}px`;
+  canvas.style.height = `${r.height}px`;
+  canvas.width  = Math.max(1, Math.round(r.width  * dpr));
+  canvas.height = Math.max(1, Math.round(r.height * dpr));
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  hud.set('contentRect', `${r.width}×${r.height}`);
+  hud.set('canvas', `${canvas.width}×${canvas.height}`);
+}
+useLayoutEffect(sizeCanvasToContent, []);
+useEffect(() => {
+  const onResize = () => sizeCanvasToContent();
+  window.addEventListener('resize', onResize);
+  return () => window.removeEventListener('resize', onResize);
+}, []);
+
+
+HUD should then show canvas ≈ contentRect * dpr.
+
+5) Remove cross-instance stop conditions
+
+Ensure no global “prerequisites” flag from another component can stop this overlay’s loop. The loop should only stop on:
+
+pause, ended, unmount, or leaving Preview.
+
+6) Keep absolute timebase in render
+
+You already fixed storage vs lookup; keep it:
+
+const tAbsMs = clipStartOffsetMs + Math.round(video.currentTime * 1000);
+const bbox = tracker.getBoxByIdAtTime(trackId, tAbsMs, { toleranceMs: 40 });
+
+Quick verification checklist
+
+Console shows exactly one [Overlay] mount and one [Overlay] startRender (with matching overlayId in HUD).
+
+HUD: rAFStarted: YES, aRAFFrameCount increases while playing.
+
+HUD: videoSrc equals the actual playing video’s currentSrc.
+
+HUD: canvas equals contentRect * dpr.
+
+Spotlight appears at/after selectedActivationTime and tracks frame-to-frame.
+
+If rAFStarted: YES but aRAFFrameCount still 0 in the HUD, add a console.info('[Overlay] rVFC fired', overlayId) at the very top of the callback. If it never logs, you’re not bound to the displayed videoEl. If it logs but HUD doesn’t increment, your HUD store is not the one this overlay writes to; bind HUD to the overlay instance or pass it via props/context, not a global singleton.

@@ -1,0 +1,77 @@
+Player detection overlay not rendering in Replit viewer
+
+Summary
+
+Server endpoint /api/detect-players returns valid YOLO detections from Replicate. Logs confirm success.
+
+The Replit viewer does not render those boxes. Instead it shows the 3×4 “player_*” regions or misaligned overlays.
+
+This is a client data-flow problem. The detections are correct on the server, but the client is not receiving, storing, or using them to draw.
+
+Evidence
+
+Image 1: Replit viewer overlay. Shows grid segments labeled player_1 ... player_12 instead of YOLO boxes.
+
+Image 2: Replicate YOLO API preview for the same frame. Correct person boxes around players.
+
+Expected
+
+After clicking Detect Players, the viewer draws the same boxes as the Replicate preview for that frame.
+
+Actual
+
+Viewer continues to show the grid or empty overlay, even when the server reports “YOLOv11 detected N players.”
+
+Repro steps
+
+Open /admin/creator and load the provided sample clip.
+
+Pause at 0:05. Click “Detect Players.”
+
+Check server logs: detection success with N boxes in <1s.
+
+Observe the viewer: still shows grid segments or boxes appear high above players.
+
+What points to a data-flow issue
+
+Network call succeeds and returns a JSON body with detections.
+
+UI badge shows “10 Players Detected,” but detectedPlayers used by the overlay is empty or stale.
+
+Toggling layout or resizing does not change the outcome.
+
+What to check in the client
+
+The fetch handler reads data.boxes and not a different key.
+
+State update is immutable and replaces the array:
+
+setWorkflow(prev => ({ ...prev, detectedPlayers: [...boxes], detectionSource: 'yolo', useStrategicPositioning: false }))
+
+CombinedClipPlayer receives detectedPlayers via props and uses that prop to draw.
+
+No useEffect or scrub handler clears detectedPlayers or re-enables the grid after detection.
+
+There is not a second store/provider instance that the child component is bound to.
+
+If the component is memoized, dependency arrays include workflow.detectedPlayers.
+
+Minimal acceptance criteria
+
+After Detect Players:
+
+workflow.detectionSource === 'yolo'
+
+workflow.detectedPlayers.length > 0 in React DevTools
+
+Grid banner is hidden
+
+Boxes in the viewer align with players as in Image 2
+
+Request
+
+Please assign an Agent to trace the client data path end-to-end and submit a small patch PR that ensures:
+
+Successful fetch → normalized boxes → state update → props → render
+
+Grid is disabled once YOLO detections arrive and remains off unless explicitly toggled

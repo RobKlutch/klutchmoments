@@ -1,0 +1,224 @@
+Adding this explicitly to the Klutch workflow summary as a critical Timeline-stage note, with diagnosis and concrete fixes.
+
+Addendum: Timeline selection handler not executing
+What you observed
+
+The bounding box click event fires. You see the “CRITICAL: BOUNDING BOX CLICK EVENT FIRED” log.
+
+None of the expected handler logs appear:
+
+“handlePlayerSelect CALLED:”
+
+“handlePlayerSelect: playerWithId created:”
+
+“SANITIZED PLAYER for workflow state:”
+
+Conclusion: the UI element receives a click, but handlePlayerSelect is never invoked.
+
+Why this breaks the workflow
+
+If handlePlayerSelect does not run, the Timeline stage never emits the critical outputs required by downstream stages:
+
+selectedPlayerId
+
+playerSeedBox at startMs in normalized coordinates
+
+A valid TimelineOut payload
+
+That in turn causes:
+
+Preselection anomalies on subsequent loads
+
+Preview overlay remaining hidden
+
+Processing misconfigurations
+
+Likely causes
+
+Event delegation mismatch
+
+The container listener fires, but the delegated selector does not match the clicked element. closest('[data-role="bbox"]') returns null.
+
+Propagation is blocked
+
+A child element inside the bounding box calls stopPropagation, preventing the delegated handler from running.
+
+Pointer events disabled or overlay intercepting
+
+CSS pointer-events: none on the bbox or pointer-events: auto on an invisible overlay above it.
+
+Z-index puts a transparent layer above the bbox.
+
+Wrong event type or passive listener
+
+Using click while the app uses pointerdown for drag. A passive listener can ignore preventDefault semantics you rely on.
+
+Stale or unbound handler reference
+
+In React, handlePlayerSelect is recreated, but the element holds a stale closure.
+
+Handler not bound due to conditional render or early return.
+
+Disabled element semantics
+
+Rendering as a disabled button or within an anchor with href="#" that navigates before code runs.
+
+Minimal, robust fix pattern
+A) Direct binding on the bbox element
+
+Prefer an explicit handler on the clickable element. This avoids delegation errors.
+
+// React
+type BBox = {
+  id: string;
+  norm: { cx: number; cy: number; w: number; h: number };
+};
+
+function TimelineBoxes({ boxes, onSelect }: { boxes: BBox[]; onSelect: (b: BBox) => void }) {
+  return (
+    <div className="bbox-layer" aria-label="Detected players">
+      {boxes.map(b => (
+        <button
+          key={b.id}
+          type="button"
+          className="bbox"
+          data-role="bbox"
+          data-player-id={b.id}
+          onPointerUp={(e) => { 
+            e.stopPropagation();
+            onSelect(b); 
+          }}
+          style={{
+            position: 'absolute',
+            left: toLeftPx(b.norm),
+            top: toTopPx(b.norm),
+            width: toWidthPx(b.norm),
+            height: toHeightPx(b.norm),
+            pointerEvents: 'auto',
+            zIndex: 3
+          }}
+          aria-label={`Select player ${b.id}`}
+        />
+      ))}
+    </div>
+  );
+}
+
+
+Key points:
+
+Use button for accessibility and reliable click semantics.
+
+Use onPointerUp to avoid conflicts with dragging the timeline.
+
+Call stopPropagation() to prevent parent listeners from swallowing the event.
+
+Ensure pointerEvents: auto and a higher z-index than overlays.
+
+B) If you must use delegation, fix the selector and propagation
+// Vanilla or React effect on mount
+const layer = document.querySelector('#bbox-layer');
+
+function onClick(e: MouseEvent) {
+  const el = (e.target as HTMLElement).closest('[data-role="bbox"]');
+  if (!el) return;
+  e.stopPropagation();
+  const id = el.getAttribute('data-player-id')!;
+  const bbox = getBoxById(id);
+  handlePlayerSelect(bbox); // must be a live reference
+}
+
+layer.addEventListener('click', onClick, { capture: false });
+// on dispose: layer.removeEventListener('click', onClick);
+
+
+Checklist:
+
+Verify data-role="bbox" is present on the clickable element, not only on a parent.
+
+Confirm no child calls stopPropagation before the delegation layer receives it.
+
+Confirm handlePlayerSelect in this scope is the current function instance.
+
+C) Handler contract and logs
+
+Make the handler atomic and observable. Fail fast if inputs are missing.
+
+function handlePlayerSelect(bbox: BBox) {
+  console.info('handlePlayerSelect CALLED:', { id: bbox.id });
+
+  const playerWithId = createPlayerWithId(bbox);
+  console.info('handlePlayerSelect: playerWithId created:', playerWithId);
+
+  const sanitized = sanitizeForWorkflow(playerWithId);
+  console.info('SANITIZED PLAYER for workflow state:', sanitized);
+
+  // Required workflow state updates
+  state.selectedPlayerId = sanitized.id;
+  state.playerSeedBox = sanitized.norm;  // normalized center format
+  state.timelineOut = {
+    sessionId: state.sessionId,
+    videoId: state.videoId,
+    startMs: state.segment.startMs,
+    endMs: state.segment.endMs,
+    playerSeedBox: sanitized.norm
+  };
+
+  // Enable Next only after state is valid
+  ui.enableNext(true);
+}
+
+D) CSS and layout guards
+
+The bbox layer must sit above the video element within the same stacking context.
+
+Avoid transforms on the video wrapper that create a new stacking context over the bbox layer.
+
+Ensure no full-screen transparent overlay is intercepting clicks.
+
+.video-wrap { position: relative; }
+#video-el { position: relative; z-index: 1; }
+#bbox-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+#bbox-layer .bbox { pointer-events: auto; } /* only the buttons receive events */
+
+E) Instrumentation to prove the fix
+
+Add one-time logs to verify the entire path runs in the same click.
+
+At the bbox element’s handler entry:
+
+[UI] bbox onPointerUp fired id=player_6
+
+
+At the top of handlePlayerSelect:
+
+handlePlayerSelect CALLED: { id: 'player_6' }
+
+
+After creating the player object:
+
+handlePlayerSelect: playerWithId created: { ... }
+
+
+After sanitization and state commit:
+
+SANITIZED PLAYER for workflow state: { id:'player_6', norm:{...} }
+
+
+If you still see the “CRITICAL: BOUNDING BOX CLICK EVENT FIRED” log but none of the four logs above, the issue is one of:
+
+The click is firing on a different layer than the element with the bound handler.
+
+The handler reference is stale or not attached due to conditional rendering.
+
+The delegated selector does not match the clicked node.
+
+Final acceptance criteria for Timeline selection
+
+Clicking any visible bounding box calls handlePlayerSelect and emits all three logs.
+
+selectedPlayerId and playerSeedBox are set in the session-scoped state.
+
+“Next” remains disabled until a selection is made in the current session.
+
+Starting a new highlight or uploading a new video shows no preselected player and no hydration of prior selection.

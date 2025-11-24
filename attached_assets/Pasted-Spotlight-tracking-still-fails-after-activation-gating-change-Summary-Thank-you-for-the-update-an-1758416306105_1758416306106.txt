@@ -1,0 +1,88 @@
+Spotlight tracking still fails after “activation gating” change
+
+Summary
+Thank you for the update and the conditional-rendering change. Despite this, the core problem persists in real playback: the spotlight does not stay locked to the selected player. The issue is not resolved.
+
+Evidence
+
+Live playback still shows detachment and lateral drift after initial placement.
+
+Screenshot at ~0:06 illustrates the spotlight fixed left while the selected player moves.
+
+Behavior is unchanged from pre-fix state.
+
+Reproduction
+
+Select a player in Timeline.
+
+Open Video Preview and press Play.
+
+Observe the spotlight for the next 3–5 seconds of motion and occlusion.
+
+Expected
+
+Spotlight appears immediately on selection.
+
+It follows only the selected player, frame by frame, with smooth motion and no drift.
+
+Actual
+
+Spotlight remains visible but detaches from the selected player and drifts left.
+
+Tracking does not remain ID-locked in visual output, despite logs indicating selection.
+
+Why the latest fix is insufficient
+Changing shouldRenderOverlay addresses visibility, not adherence. The failure appears in the end-to-end path: coordinate space, scaling, or draw order causes the overlay to render at incorrect positions relative to the video frame, even when the selectedPlayerId is correct.
+
+Required actions
+Please escalate to senior engineering and verify the full pipeline in real playback, not only via logs.
+
+Instrumentation (must-have for verification)
+
+Draw the tracked bounding box and center point on the overlay with the selectedPlayerId label.
+
+Display on-screen state: videoW/H, canvasW/H, devicePixelRatio, object-fit, transform, selectedPlayerId, hasReachedDetectionTime, isManuallySelected.
+
+Log and render per-frame the raw detector box (video coordinates) and the transformed overlay box (DOM coordinates).
+
+Coordinate pipeline audit
+
+Confirm a single coordinate space. All transforms should be video frame → normalized [0..1] → overlay pixels.
+
+Remove any CSS transforms on the video container that are not mirrored on the overlay (e.g., scale, translate, object-fit: contain, letterboxing).
+
+Use getBoundingClientRect() once per frame to compute the exact video content rectangle inside the player, then place the overlay within that rect.
+
+Validate no left-anchoring due to top-left vs center origin mismatches or rounding.
+
+Update loop order
+
+Ensure tracking update runs before overlay draw on each requestAnimationFrame.
+
+Disable any competing timers or stale state that can overwrite the current position.
+
+ID-lock enforcement
+
+Hard-assert: if selectedPlayerId is set, the visual overlay must use only that ID’s box. Proximity fallbacks must be disabled while selected.
+
+When the ID is temporarily missing, freeze last valid position for up to N frames rather than jumping.
+
+Cross-device test matrix
+
+Test at 1.0 and >1.0 devicePixelRatio.
+
+Test with different viewport sizes and with object-fit: contain vs cover.
+
+Verify with at least two clips that include occlusion and direction changes.
+
+Acceptance criteria to close
+
+Overlay IoU with the selected player’s box ≥ 0.6 for 95% of frames over a 10-second clip.
+
+Max instantaneous positional error ≤ 20 pixels at 1080p.
+
+Zero frames where the overlay is drawn outside the selected player while a valid box exists.
+
+No lateral “sticking” to screen edges during scaling or seek.
+
+Video showing the above instrumentation passing on the same clip used for reproduction, plus commit SHA of the fix.

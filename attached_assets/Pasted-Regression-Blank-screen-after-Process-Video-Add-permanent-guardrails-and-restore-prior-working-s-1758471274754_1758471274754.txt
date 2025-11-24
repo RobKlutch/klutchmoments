@@ -1,0 +1,113 @@
+Regression. Blank screen after “Process Video”. Add permanent guardrails and restore prior working state.
+
+Team,
+
+After pressing “Process Video (Admin)” on the Effects screen, the app goes to a blank page at /admin/creator. This has recurred multiple times. It is a blocker and must not re-occur.
+
+Repro
+
+Load clip.
+
+Select player in Timeline.
+
+Choose Spotlight effect and settings.
+
+Click “Process Video (Admin)”.
+
+Result: white screen. No UI, no controls.
+
+Expected
+
+UI remains mounted with a non-blocking progress state.
+
+If processing fails, a visible error message appears with a retry button.
+
+No full-page blank screen.
+
+Immediate fixes required
+
+Page-level ErrorBoundary
+
+Wrap the Creator route in an ErrorBoundary that shows a fallback UI with:
+
+Error message and stack
+
+“Reload Effects” and “Report error” buttons
+
+Log ID for server correlation
+
+Strict prerequisite guard before processing
+
+Disable “Process Video” until:
+
+videoReady = true
+
+contentRect and canvas are non-null
+
+selectedPlayerId is set
+
+rAF loop is running
+
+Button shows tooltip with unmet prerequisites. No navigation or rendering start until all true.
+
+Single-flight and debounced action
+
+Prevent double-submission. Use a single-flight promise and disable the button while in-flight.
+
+Add a 30 s processing timeout with a graceful abort and visible error.
+
+Try/catch and fail-safe rendering
+
+Wrap the processing kickoff, worker messages, and any OffscreenCanvas/WebGL init in try/catch.
+
+On error:
+
+Cancel rAF if started
+
+Keep page mounted
+
+Show error banner with error code and next steps
+
+Lifecycle ordering
+
+Do not start processing until loadedmetadata and canplay fired and overlay canvas is sized to the video content rect.
+
+On unmount or route change, always cancelAnimationFrame, terminate workers, and clear timers.
+
+Global error capture
+
+Add window.onerror and window.onunhandledrejection to log error name, message, stack, and last UI state to console and server with a correlation ID.
+
+Non-regression lock
+
+Add a Playwright e2e test that:
+
+Clicks “Process Video”
+
+Asserts the page never becomes blank
+
+Verifies progress UI and eventual success or visible error
+
+Add CI check that fails on any console error matching “TypeError”, “Cannot read properties of undefined”, “Hydration failed”, or “WebGL context lost”.
+
+Data to return with the fix
+
+First error line and stack from the Browser Console.
+
+Network tab status for processing requests and worker assets.
+
+Commit SHAs for the regression and the fix.
+
+A 20–30 second screen recording showing:
+
+“Process Video” pressed
+
+Progress UI shown
+
+No blank screen
+
+Success or handled error with retry
+
+Reminder on the core spotlight issue
+
+The freeze at the initial lock must be removed. After activation, overlay position must be read from the per-frame center of the selected player’s box, not from any manual anchor. One rAF loop reads video.currentTime, performs ID→box lookup at sampleTime, computes position, smooths, and draws. No competing timers, no proximity fallback while selected.

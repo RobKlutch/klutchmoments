@@ -1,0 +1,85 @@
+Key data passed into Video Preview
+
+segment: startMs, endMs
+
+playerSeedBox at startMs in normalized video space
+
+selectedPlayerId from Timeline if available (advisory)
+
+effectConfig from Effects
+
+videoMeta
+
+Subject lock lifecycle in Video Preview
+
+Define five phases. The app moves through these deterministically.
+
+Seed
+
+On load, seek to startMs and pause.
+
+Use playerSeedBox as the last-known position.
+
+Optional: draw a ghost indicator labeled “arming” so the user sees the target location while paused.
+
+Reacquire
+
+Warm up YOLOv11 detections around startMs.
+
+Find the live detection nearest to playerSeedBox within a tolerance.
+
+Adopt its trackId. Log acquiredAtMs.
+
+Do not render the real effect until a valid bbox is confirmed.
+
+Lock
+
+Once a valid bbox exists at or after startMs, set subjectLock = { trackId }.
+
+Replace the ghost with the real effect using effectConfig.
+
+If Preview is paused at startMs and a bbox is available, show the real effect immediately.
+
+Track
+
+On play, start a single RAF loop.
+
+For each frame between startMs and endMs, fetch bbox for subjectLock.trackId.
+
+Map normalized bbox to the painted video rect, then render the effect.
+
+If bbox is missed briefly, keep the last position for up to N milliseconds and fade the effect down slightly, then hide if still missing.
+
+Release
+
+At endMs, pause rendering and hide the effect.
+
+On stage exit, dispose RAF, listeners, and overlays.
+
+Visibility rules
+
+Show the real effect only when both conditions are true:
+
+time >= startMs and time <= endMs
+
+valid bbox exists for the locked subject
+
+Before that, either show nothing or show the ghost at playerSeedBox.
+
+Never pin a static effect to the screen without a valid bbox.
+
+Event timeline
+
+Enter Preview → seek to startMs → Reacquire subject → if paused and bbox exists, render effect immediately → on Play, RAF runs and effect tracks every frame → stop at endMs.
+
+Acceptance criteria
+
+The effect shown in Preview matches effectConfig byte for byte.
+
+If a bbox exists at startMs, the effect is visible while paused at load.
+
+When playback crosses startMs, the effect appears no later than the first frame with a valid bbox and follows the player to endMs.
+
+Losing the subject briefly hides or gracefully fades the effect until reacquired.
+
+One RAF loop only. Coordinates remain aligned across aspect ratios.

@@ -1,0 +1,185 @@
+Since the issue persists after the coordinate, RAF, and propagation changes, the failure is almost certainly in one of three places: effect selection/state, timestamp alignment, or coordinate normalization at runtime. Below is a focused, developer-ready triage with precise checks, likely root causes that still fit your described symptoms, and concrete patches. I am also restating the expected behavior at the end, tailored to this scenario.
+
+What your symptoms imply
+
+The overlay appears from the first frame, stays visible on the right edge, and does not match the selected effect.
+
+This pattern is classic for either:
+
+A silent fallback to a default effect after validation passes, or a post-init “normalizer” overwriting effect_config.
+
+A transform double-application or wrong origin that pins the overlay near the right letterbox margin.
+
+A timestamp race where the RAF renders before the first valid tracker bbox and keeps using a constant placeholder rect.
+
+High-impact checks to run now
+
+Verify effect identity after init and after first RAF tick
+Add a one-time console.info inside the first RAF iteration, not just at Preview init:
+
+if (!state.__printedOnce) {
+  console.info('[Preview:effect-at-first-RAF]', JSON.stringify(state.effect));
+  state.__printedOnce = true;
+}
+
+
+If this does not match Effects’ selection byte-for-byte, the effect is being overwritten after validation. Search for any “normalizeEffect”, “applyDefaults”, or “useEffect(()=> setEffect(...))” that runs after mount.
+
+Assert player lock and first valid bbox before showing overlay
+Gate overlay visibility on a verified bbox for the selected player:
+
+const bbox = tracker.getBBox(state.playerId, t);
+const hasBBox = bbox && Number.isFinite(bbox.x) && Number.isFinite(bbox.y) && bbox.w > 0 && bbox.h > 0;
+overlay.setVisible(hasBBox);
+if (!hasBBox) return requestAnimationFrame(tick);
+
+
+If this removes the static right-side overlay, you were rendering with a placeholder rect before tracking was ready.
+
+Eliminate “double transform” to screen coordinates
+Ensure you are not mapping normalized→video→screen twice. Add a debug rectangle draw that uses only normalized→video once and compares to normalized→video→screen:
+
+const rVid = mapNormToVideo(bbox, videoRect);     // expected
+const rScr = mapVideoToScreen(rVid, screenRect);  // only if you truly need screen space
+
+debugDraw(rVid, 'videoSpace');
+debugDraw(rScr, 'screenSpace');
+
+
+If rScr is consistently offset to the right while rVid is centered, your second transform is redundant or your screenRect is already letterbox-compensated.
+
+Confirm coordinate origin and anchor
+Many effects assume the input rect is top-left anchored, but your renderer might treat it as center-anchored. Pinning to the right side is common when left/top is computed as centerX or when CSS transform: translate(-50%, -50%) is applied to a rect treated as top-left. Add a one-frame outline rectangle that uses a plain absolute top/left with width/height, no CSS transform. If that aligns, remove translate() from the effect container or change the anchor.
+
+DPR and CSS scaling
+If the video is scaled by CSS and you use devicePixelRatio in canvas but not in DOM overlay, the overlay can drift to the right. Log:
+
+console.info({ dpr: window.devicePixelRatio, videoRect, canvasRect, overlayRect, scaleX, scaleY, offsetX, offsetY });
+
+
+Confirm both the transform and the renderer are either DPR-aware or DPR-agnostic consistently.
+
+Timebase alignment
+Ensure the first overlay draw happens only after:
+
+video.currentTime >= start_time_ms
+
+tracker has emitted a bbox at or after start_time_ms for playerId
+
+If detection updates every 1 second but your highlight begins in the first 500 ms, you may render a stale bbox or a placeholder until t=1s, which appears “stuck.” Solution: prefetch N frames of tracking around start_time_ms or defer overlay until first valid bbox at or after start_time_ms.
+
+Likely remaining root causes and patches
+
+A) Silent effect fallback after validation
+Symptom: wrong effect type appears every time.
+Patch: remove any post-mount state normalization and make effect_config the single source of truth.
+
+// Bad:
+useEffect(() => setEffect(defaultEffect), []);
+
+// Good:
+useEffect(() => setEffect(previewInit.effect_config), []);
+// and never overwrite effect thereafter except via explicit user action
+
+
+B) Normalized vs. absolute bbox mixup
+If tracker returns [cx, cy, w, h] normalized and renderer expects [x, y, w, h] top-left absolute, the overlay will appear off to the right.
+Patch:
+
+function toTopLeftAbsolute(b) {
+  // b: normalized center format
+  const x = (b.cx - b.w / 2) * videoRect.width + videoRect.left;
+  const y = (b.cy - b.h / 2) * videoRect.height + videoRect.top;
+  const w = b.w * videoRect.width;
+  const h = b.h * videoRect.height;
+  return { x, y, w, h };
+}
+
+
+And ensure only one letterbox compensation: videoRect must be the painted video area, not the outer container.
+
+C) First-frame overlay rendered before valid bbox
+Gate visibility on the hasBBox check above. Additionally, add a small startup debounce:
+
+const ready = t >= state.segment.start && hasBBox;
+overlay.setVisible(ready);
+
+
+D) CSS translations
+If your effect element uses translate(-50%, -50%) while you compute top-left, it will jump right. Remove translations or compute center anchor explicitly:
+
+const centerX = rect.x + rect.w / 2;
+const centerY = rect.y + rect.h / 2;
+overlay.style.left = `${centerX}px`;
+overlay.style.top  = `${centerY}px`;
+overlay.style.transform = 'translate(-50%, -50%)';
+
+
+Pick one convention and enforce it platform-wide.
+
+E) Double letterbox compensation
+If mapNormToVideo already returns coordinates inside the painted letterboxed region, do not add offsetX/offsetY again in mapVideoToScreen. Audit both functions and keep a single authoritative calculation.
+
+Micro test harness to prove alignment
+
+Create a test mode with a synthetic tracker path:
+
+function fakeTracker(t) {
+  // moves from left to right across normalized space in 2 seconds
+  const p = Math.min(1, Math.max(0, (t - start)/2000));
+  return { cx: 0.1 + 0.8*p, cy: 0.5, w: 0.08, h: 0.18 };
+}
+
+
+With the video paused at start_time_ms, step time forward by 100 ms and verify the overlay moves each step.
+
+Toggle 1:1 render mode with no CSS scaling. If alignment is correct in 1:1 but wrong in responsive mode, the bug is CSS scaling or double compensation.
+
+Minimal corrected RAF loop
+function tick() {
+  const t = video.currentTimeMs();
+  const inWindow = t >= state.segment.start && t <= state.segment.end;
+
+  if (!inWindow) { overlay.hide(); return requestAnimationFrame(tick); }
+
+  const bboxN = tracker.getBBox(state.playerId, t);
+  const hasBBox = bboxN && Number.isFinite(bboxN.cx);
+
+  if (!hasBBox) { overlay.hide(); return requestAnimationFrame(tick); }
+
+  const vRect = getPaintedVideoRect(videoEl); // inner rect, already letterbox-compensated
+  const rect = normCenterToTopLeftAbsolute(bboxN, vRect); // one transform only
+
+  overlay.render(state.effect, rect); // effect comes only from effect_config, no fallback
+  requestAnimationFrame(tick);
+}
+
+Acceptance criteria to confirm the fix
+
+The effect type and parameters at first RAF tick equal the Effects stage selection.
+
+The overlay is invisible until the first valid bbox for the selected player at or after start_time_ms.
+
+The overlay remains centered on the player through the clip and does not pin to any screen edge.
+
+Resizing the window preserves alignment.
+
+Switching effects within Preview updates visual output immediately without reverting to defaults.
+
+Expected outcome for Video Preview in this scenario
+
+Playback begins at the selected highlight timestamp from Timeline.
+
+The exact effect chosen in Effects (type and all parameters) is applied.
+
+The effect is bound to the selected player and follows that player each frame, using the tracker’s bbox.
+
+The effect is positioned using a single, correct transform from normalized video coordinates to the painted video rectangle, accounting for letterbox once.
+
+If the tracker has not yet produced a bbox at the start timestamp, the overlay remains hidden until the first valid bbox is available, then appears and tracks smoothly.
+
+If the tracker temporarily loses the player, the effect hides and resumes when reacquired.
+
+Preview controls allow changing effect or player and the changes are reflected instantly.
+
+If you share a short console log excerpt for the first three seconds showing: effect_config at first RAF, playerId, videoRect, bboxN, and final rect, I can pinpoint which of the above is still misaligned and provide a 1–2 line patch.

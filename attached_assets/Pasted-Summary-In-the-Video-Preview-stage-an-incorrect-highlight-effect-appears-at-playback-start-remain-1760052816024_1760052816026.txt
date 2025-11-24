@@ -1,0 +1,201 @@
+Summary
+
+In the Video Preview stage, an incorrect highlight effect appears at playback start, remains static on the right side for the entire video, and does not match the user’s selected effect from the Effects stage. The effect is not bound to the tracked player and is not updating frame by frame.
+
+Observed Behavior
+
+A highlight effect appears immediately at playback start.
+
+The effect type and settings do not match the selection made in the Effects stage.
+
+The effect remains fixed in one on-screen position on the right side for the full duration.
+
+The effect does not follow the selected player.
+
+Expected Behavior for the Video Preview Stage
+
+When the user arrives at Video Preview after selecting a player and configuring an effect:
+
+Playback start time equals the chosen highlight timestamp from the Timeline stage.
+
+The effect type and parameters match exactly what was selected in the Effects stage.
+
+The effect is anchored to the selected player ID and follows that player throughout the preview using the active tracker.
+
+The effect’s position updates on every frame using video-space coordinates, correctly transformed to the preview canvas or DOM overlay.
+
+If the tracker temporarily loses the player, the effect gracefully hides or interpolates until reacquired.
+
+Start and end boundaries reflect the chosen segment. Trims adjust playback and effect duration in sync.
+
+User controls allow changing effect settings or reselecting the player and see changes reflected immediately.
+
+Likely Root Causes
+
+Effect configuration not propagated
+
+Effects stage JSON not passed, or a default effect is applied in Preview.
+
+Schema mismatch or key renaming between stages.
+
+Player binding lost
+
+The selected player_id not supplied to the tracker, or overwritten on mount.
+
+Preview uses a stale or null subject_id.
+
+Static overlay due to coordinate bugs
+
+Using screen or CSS coordinates instead of video-space coordinates.
+
+Missing letterbox/pillarbox compensation. Effect is drawn in the right gutter where black bars or scaled margins exist.
+
+No per-frame transform. Effect rendered once at t0 and never updated.
+
+Tracker not driving the overlay
+
+requestAnimationFrame loop not wired to tracker output.
+
+Async race: frames render before tracker state is ready.
+
+Memoization or stale closures holding an early bounding box.
+
+Stage contract violations
+
+Timeline → Effects → Preview interface contract changed. Required fields like timestamp, player_id, bbox, effect_config not validated at stage entry.
+
+Diagnostic Steps
+
+Run these checks in order:
+
+Validate stage input payload
+
+Log the incoming Preview payload: {session_id, video_id, start_time, player_id, effect_config, segment_bounds}.
+
+Confirm effect_config keys match what Preview expects.
+
+Confirm correct effect selection
+
+Assert Preview’s initial effect state equals the passed effect_config.
+
+Disallow fallback to defaults unless explicitly missing.
+
+Verify tracker binding
+
+At t0, log tracker.subject_id and ensure it equals the selected player_id.
+
+Trace tracker outputs per frame: frame_idx, bbox[x,y,w,h], confidence.
+
+Coordinate pipeline
+
+Print one frame’s values: raw bbox (video space), scale factors, offset_x, offset_y, letterbox margins, final screen coords.
+
+Resize window to force reflow and verify overlay remains aligned.
+
+RAF update loop
+
+Ensure overlay render is called every frame with latest tracker bbox.
+
+Check that the RAF loop is not short-circuited by a stale condition.
+
+Regression guard
+
+Temporarily disable letterboxing and fit the video 1:1. If the overlay aligns in this mode, the issue is in scaling and margins.
+
+Fix Plan
+
+Enforce a strict stage interface
+
+Define Types:
+
+EffectConfig { type, radius, intensity, color, duration, style_options }
+
+PreviewInit { session_id, video_id, start_time_ms, end_time_ms, player_id, effect_config }
+
+Validate at Preview entry. If invalid, block with a visible error.
+
+Thread the selected effect into Preview state
+
+Replace any default initialization with the passed effect_config.
+
+Remove any code that “normalizes” to a default effect silently.
+
+Align coordinates to video space
+
+Maintain a single source of truth for transforms:
+
+screen_x = offset_x + scale_x * (bbox_x)
+
+screen_y = offset_y + scale_y * (bbox_y)
+
+Compute offset and scale from the actual rendered video rectangle.
+
+Recompute on resize or device pixel ratio changes.
+
+Apply letterbox/pillarbox compensation.
+
+Bind overlay updates to tracker frames
+
+On each tracker update:
+
+Read current bbox for player_id.
+
+Convert to screen coords.
+
+Render effect overlay at new position.
+
+Hide effect when bbox is null. Show again on reacquisition.
+
+Frame-accurate start
+
+Seek to start_time_ms before enabling the overlay.
+
+First overlay render occurs after first valid tracker bbox at or after start_time_ms.
+
+Reset stale overlays
+
+On entering Preview, clear any previous overlay elements.
+
+Ensure only one overlay instance is attached to the DOM or canvas layer.
+
+Robustness and fallbacks
+
+If selected effect uses properties not supported by the current renderer, warn and offer supported substitutes without silently swapping.
+
+Acceptance Criteria
+
+The effect shown in Preview matches the type and parameters chosen in Effects, byte for byte.
+
+The effect follows the selected player continuously and appears centered on the tracked bbox each frame.
+
+The effect never appears fixed at a screen edge when the player moves elsewhere.
+
+Changing effect settings in Preview updates the overlay immediately.
+
+Resizing the viewport does not misalign the overlay.
+
+If the tracker loses the player, the effect hides until reacquired, then resumes alignment.
+
+Instrumentation and Logging
+
+At Preview init: log payload summary and validation result.
+
+Per frame (sample every N frames): log player bbox, transform components, final overlay rect.
+
+On error: unified error event with stage name, payload hash, and stack.
+
+Add a “Show Debug Overlay” toggle that draws bbox, anchor point, and the computed overlay rect.
+
+Edge Cases Checklist
+
+Non-16:9 videos with letterboxing.
+
+Variable frame rates.
+
+High-DPI displays.
+
+Very small or partially occluded players.
+
+Multiple players crossing paths; verify subject_id lock.
+
+Short highlights under 2 seconds; verify correct in/out frames.
