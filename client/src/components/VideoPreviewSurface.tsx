@@ -101,7 +101,7 @@ export default function VideoPreviewSurface({
       console.log('🎬 PREVIEW_EXIT: VideoPreviewSurface component unmounted');
       logger.log('Component unmounted');
     };
-  }, [logger]);
+  }, [logger, videoUrl, selectedPlayer, timelineDetectionCache, timeSelection, detectionTime, selectedEffect?.effect?.name]);
 
   // **PREVIEW CONTROLS** - Initialize with settings from Effects stage
   const [effectSettings, setEffectSettings] = useState(() => {
@@ -143,8 +143,6 @@ export default function VideoPreviewSurface({
   });
 
   // **SYNC EFFECT SETTINGS FROM PROPS**: Derive settings from props and track with ref for comparison
-  // This ensures that if user goes back to Effects stage and changes effect/settings,
-  // the Video Preview stage will update to reflect those changes
   const prevSettingsRef = useRef({ intensity: 0, size: 0, color: '' });
   
   useEffect(() => {
@@ -193,7 +191,6 @@ export default function VideoPreviewSurface({
       return null;
     }
     
-    // **CRITICAL**: Validate bounding box coordinates exist
     if (typeof selectedPlayer.x !== 'number' || 
         typeof selectedPlayer.y !== 'number' || 
         typeof selectedPlayer.width !== 'number' || 
@@ -208,7 +205,6 @@ export default function VideoPreviewSurface({
       return null;
     }
     
-    // **FIX**: Compute center coordinates from valid bounding box
     const player = { ...selectedPlayer };
     if (typeof player.centerX !== 'number') {
       player.centerX = player.x + player.width / 2;
@@ -226,14 +222,13 @@ export default function VideoPreviewSurface({
       bbox: { x: player.x, y: player.y, width: player.width, height: player.height }
     });
     return player;
-  }, [selectedPlayer]); // **CRITICAL FIX**: Removed logger from deps - it's unstable and causes RAF restart loop
+  }, [selectedPlayer, logger]);
 
   // **PLAYBACK CONTROLLER** - Centralized state + RAF
-  // Use ref to avoid closure issues with controller reference
   const shouldRewind = useRef(false);
 
   const controller = usePreviewController({
-    initialTime: timeSelection.start, // **FIX**: Start at 0:00 of trimmed clip (user's selected segment start)
+    initialTime: timeSelection.start,
     timeRange: timeSelection,
     onPlaybackEnd: () => {
       console.log('🏁 PLAYBACK END CALLBACK', { timeSelection });
@@ -242,7 +237,6 @@ export default function VideoPreviewSurface({
     }
   });
 
-  // **DEBUG**: Log timeSelection to verify range
   useEffect(() => {
     console.log('📏 TIME SELECTION RANGE:', {
       start: timeSelection.start,
@@ -253,11 +247,10 @@ export default function VideoPreviewSurface({
 
   const { state, videoRef, play, pause, seek } = controller;
 
-  // Handle rewind after playback ends
   useEffect(() => {
     if (shouldRewind.current && !state.isPlaying) {
       shouldRewind.current = false;
-      seek(timeSelection.start); // **FIX**: Rewind to clip start (0:00 of trimmed segment)
+      seek(timeSelection.start);
       logger.log('Rewound to clip start');
     }
   }, [state.isPlaying, seek, timeSelection.start, logger]);
@@ -272,8 +265,6 @@ export default function VideoPreviewSurface({
       src: video.src?.slice(-30)
     });
 
-    // Ensure video loads metadata and is ready to play when user clicks button
-    // This does NOT start playback - just prepares the video element
     video.load();
     
     const handleCanPlay = () => {
@@ -299,7 +290,7 @@ export default function VideoPreviewSurface({
       video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('loadedmetadata', handleMetadataLoaded);
     };
-  }, [videoRef]); // Only run once on mount
+  }, [videoRef]);
 
   // **SPOTLIGHT TRACKER** - Uses videoRef from controller
   const selectionAnchor = useMemo(() => {
@@ -337,14 +328,11 @@ export default function VideoPreviewSurface({
   useEffect(() => {
     if (!validatedPlayer) {
       logger.warn('ValidatedPlayer became null - stopping all operations');
-      // Pause video if playing
       if (videoRef.current && !videoRef.current.paused) {
         videoRef.current.pause();
       }
-      // **REMOVED resetTracking() - it destroys tracking state during Video Preview**
-      // The tracking system should maintain state even when player is temporarily null
     }
-  }, [validatedPlayer, logger]);
+  }, [validatedPlayer, logger, videoRef]);
 
   // **TIMELINE CACHE INGESTION** - Load initial detections (wait for valid dimensions)
   useEffect(() => {
@@ -366,8 +354,6 @@ export default function VideoPreviewSurface({
       return;
     }
 
-    // **CRITICAL FIX**: Wait for valid video dimensions before ingesting
-    // Without this, all detections normalize to (0,0) and tracker can't find the player
     if (video.videoWidth === 0 || video.videoHeight === 0) {
       console.log('⏳ CACHE INGESTION: Waiting for video metadata', {
         readyState: video.readyState,
@@ -395,7 +381,6 @@ export default function VideoPreviewSurface({
       return () => video.removeEventListener('loadedmetadata', handleMetadataLoaded);
     }
 
-    // Video already has valid dimensions, ingest immediately
     console.log('✅ CACHE INGESTION: Ingesting timeline cache immediately', {
       dimensions: `${video.videoWidth}x${video.videoHeight}`,
       cacheTime: timelineDetectionCache.timestamp,
@@ -411,116 +396,78 @@ export default function VideoPreviewSurface({
     });
   }, [timelineDetectionCache, validatedPlayer?.id, videoRef, ingestDetections, logger]);
 
-  // **1Hz DETECTION SCHEDULER** - Continuous tracking during playback
+  // **1Hz DETECTION SCHEDULER** - Continuous tracking during playback (video URL → Replicate)
   const handleDetection = useCallback(async (
     playerId: string,
     currentTime: number,
     videoElement: HTMLVideoElement
   ) => {
-    // **ABORT PREVIOUS**: Cancel any in-flight fetch request FIRST
+    // Abort previous
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     
-    // **CANCEL PREVIOUS**: Create new token AFTER abort to invalidate old flows
     const myCancelToken = {};
     cancelTokenRef.current = myCancelToken;
-    
-    // **REQUEST ID GUARD**: Increment to track request sequence
     const currentRequestId = ++requestIdRef.current;
     
-    // **NEW ABORT CONTROLLER**: Create fresh controller for this request
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
-    
-    // Capture frame and call detection API
-    const canvas = document.createElement('canvas');
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      logger.error('Failed to get canvas context');
-      return;
-    }
 
-    ctx.drawImage(videoElement, 0, 0);
-    
-    // **PRE-BLOB GUARD**: Check token before starting async toBlob
-    if (cancelTokenRef.current !== myCancelToken) {
-      logger.log('Dropping detection before toBlob - request cancelled');
-      return;
-    }
-    
-    const blob = await new Promise<Blob | null>(resolve => 
-      canvas.toBlob(resolve, 'image/jpeg', 0.85)
-    );
-
-    // **EARLY GUARD**: Recheck after async toBlob - stale flow may have been cancelled
-    if (cancelTokenRef.current !== myCancelToken) {
-      logger.log('Dropping detection after toBlob - request cancelled', {
-        requestId: currentRequestId
-      });
-      return;
-    }
-    
     if (!isMountedRef.current) {
-      logger.log('Dropping detection after toBlob - component unmounted');
+      logger.log('Dropping detection - component unmounted before request');
       return;
     }
 
-    if (!blob) {
-      logger.error('Failed to create frame blob');
-      return;
-    }
-
-    // Call detection API
-    const formData = new FormData();
-    formData.append('frame', blob);
-    formData.append('videoId', videoId); // **FIX**: Use consistent videoId for tracking continuity
-    formData.append('timestampMs', (currentTime * 1000).toString()); // **FIX**: Server expects timestampMs in milliseconds
-    formData.append('selectedPlayerId', playerId);
-    
-    // **SPATIAL FIX**: Send most recent tracking box coordinates for ID-LOCK RECOVERY
-    // Use live tracking box if available, fall back to initial selectedPlayer
+    // Prepare selectedPlayer payload (spatial context)
     const { normalizePlayerForDetection } = await import('@/utils/playerCoordinates');
-    
+
+    let selectedPlayerPayload: any | null = null;
+
     if (trackingBox) {
-      // Use tracking box coordinates - already normalized
       const centerX = trackingBox.x + trackingBox.width / 2;
       const centerY = trackingBox.y + trackingBox.height / 2;
-      
-      formData.append('selectedPlayer', JSON.stringify({
+
+      selectedPlayerPayload = {
         id: playerId,
         x: trackingBox.x,
         y: trackingBox.y,
         centerX,
         centerY,
         width: trackingBox.width,
-        height: trackingBox.height
-      }));
+        height: trackingBox.height,
+      };
     } else if (selectedPlayer) {
-      // Fallback to initial selectedPlayer coordinates - normalize to ensure all fields present
       const normalizedPlayer = normalizePlayerForDetection(selectedPlayer);
-      if (normalizedPlayer) {
-        formData.append('selectedPlayer', JSON.stringify(normalizedPlayer));
-      } else {
+      if (!normalizedPlayer) {
         logger.error('Failed to normalize selectedPlayer for detection', { selectedPlayer });
         return;
       }
+      selectedPlayerPayload = normalizedPlayer;
     } else {
       logger.error('No selectedPlayer or trackingBox available for detection');
       return;
     }
 
+    const payload = {
+      videoUrl,                          // Replicate model expects video URL
+      timestampMs: currentTime * 1000,
+      sessionId: videoId,
+      detectionMethod: 'replicate',
+      selectedPlayerId: playerId,
+      selectedPlayer: selectedPlayerPayload,
+    };
+
     try {
       const response = await fetch('/api/detect-players', {
         method: 'POST',
-        body: formData,
-        signal: abortController.signal
+        signal: abortController.signal,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
 
-      // **STALE GUARD**: Drop response if cancelled or component unmounted
       if (cancelTokenRef.current !== myCancelToken) {
         logger.log('Dropping stale detection response - request cancelled', { 
           requestId: currentRequestId
@@ -534,12 +481,12 @@ export default function VideoPreviewSurface({
       }
 
       if (!response.ok) {
+        logger.error('Detection failed with HTTP status', { status: response.status });
         throw new Error(`Detection failed: ${response.status}`);
       }
 
       const data = await response.json();
       
-      // **DOUBLE-CHECK**: Verify still mounted and not cancelled before ingesting
       if (cancelTokenRef.current !== myCancelToken) {
         logger.log('Dropping parsed detection - request cancelled');
         return;
@@ -551,11 +498,12 @@ export default function VideoPreviewSurface({
       }
       
       if (data.success && data.players) {
-        // **CRITICAL FIX**: Wait for video metadata before ingesting detections
-        // Server returns normalized [0,1] coordinates, but useSpotlightTracker
-        // needs video dimensions to properly handle coordinate transformations
         const video = videoElement || videoRef.current;
-        
+        if (!video) {
+          logger.error('Cannot ingest detections - no video element');
+          return;
+        }
+
         const ingestWithDimensions = (v: HTMLVideoElement) => {
           console.log('🔍 INGEST CHECK:', {
             hasWidth: !!v.videoWidth,
@@ -586,7 +534,6 @@ export default function VideoPreviewSurface({
             } : null
           }, 2000);
 
-          // Ingest new detections into tracker with valid video dimensions
           ingestDetections({
             players: data.players,
             frameWidth: v.videoWidth,
@@ -597,16 +544,9 @@ export default function VideoPreviewSurface({
           console.log('✅ INGESTION COMPLETE');
         };
         
-        if (!video) {
-          logger.error('Cannot ingest detections - no video element');
-          return;
-        }
-        
-        // If metadata already loaded, ingest immediately
         if (video.videoWidth > 0 && video.videoHeight > 0) {
           ingestWithDimensions(video);
         } else {
-          // Wait for metadata to load, then ingest
           logger.log('Waiting for video metadata before ingesting detection');
           const handleMetadata = () => {
             logger.log('Video metadata loaded, ingesting queued detection');
@@ -614,20 +554,24 @@ export default function VideoPreviewSurface({
           };
           video.addEventListener('loadedmetadata', handleMetadata, { once: true });
         }
+      } else {
+        logger.log('Detection response did not include players', {
+          success: data.success,
+          keys: Object.keys(data || {}),
+        });
       }
     } catch (error) {
-      // Ignore abort errors
       if (error instanceof Error && error.name === 'AbortError') {
         logger.log('Detection request aborted');
         return;
       }
       logger.error('Detection API call failed', error);
     }
-  }, [ingestDetections, logger]);
+  }, [videoUrl, videoId, selectedPlayer, trackingBox, ingestDetections, logger]);
 
   useDetectionScheduler({
-    enabled: state.isPlaying && !!validatedPlayer && (detectionTime == null || state.currentTime >= detectionTime), // **ACTIVATION GATING**: Only run detections after playback reaches activation timestamp (both use absolute coordinates)
-    intervalMs: 1000, // 1Hz
+    enabled: state.isPlaying && !!validatedPlayer && (detectionTime == null || state.currentTime >= detectionTime),
+    intervalMs: 1000,
     playerId: validatedPlayer?.id || null,
     videoRef,
     onDetection: handleDetection
@@ -657,7 +601,7 @@ export default function VideoPreviewSurface({
         logger.error('Play failed', error);
       }
     }
-  }, [state.isPlaying, play, pause, logger, videoRef]);
+  }, [state.isPlaying, play, pause, logger, videoRef, state.currentTime]);
 
   const handleRestart = useCallback(() => {
     seek(timeSelection.start);
@@ -668,30 +612,6 @@ export default function VideoPreviewSurface({
     const newTime = values[0];
     seek(newTime);
   }, [seek]);
-
-  // **EFFECT SETTINGS HANDLERS**
-  const handleSettingChange = useCallback((key: string, value: any) => {
-    // **FUNCTIONAL SPEC**: Clamp to spec bounds - size 5-60%, intensity 0-100%, feather 0-50%
-    // **CRITICAL FIX**: Guard against undefined/NaN values from sliders
-    if (value === undefined || value === null || isNaN(value)) {
-      logger.warn('Invalid slider value', { key, value });
-      return;
-    }
-    
-    let clampedValue = value;
-    if (key === 'intensity') {
-      clampedValue = Math.max(0, Math.min(1, value)); // 0-100%
-    } else if (key === 'size') {
-      clampedValue = Math.max(0.05, Math.min(0.6, value)); // 5-60% of diagonal
-    } else if (key === 'feather') {
-      clampedValue = Math.max(0, Math.min(0.5, value)); // 0-50%
-    }
-    
-    const newSettings = { ...effectSettings, [key]: clampedValue };
-    setEffectSettings(newSettings);
-    onSettingsChangeRef.current?.(newSettings);
-    logger.log('Setting changed', { key, value: clampedValue });
-  }, [effectSettings, logger]); // **CRITICAL FIX**: Use ref for onSettingsChange to prevent infinite parent re-renders
 
   // **DEFENSIVE GUARD** - Show error UI if player is invalid
   if (!validatedPlayer) {
@@ -782,14 +702,14 @@ export default function VideoPreviewSurface({
               trackingBox={trackingBox}
               effect={selectedEffect?.effect?.id || 'beam'}
               settings={{
-                intensity: Math.max(0, Math.min(100, (effectSettings.intensity || 0.6) * 100)), // Convert 0-1 to 0-100% (functional spec)
-                size: Math.max(5, Math.min(60, (effectSettings.size || 0.18) * 100)), // Convert 0-1 to 5-60% (functional spec)
-                color: effectSettings.color || '#3b82f6'  // Pass through color from Effects stage
+                intensity: Math.max(0, Math.min(100, (effectSettings.intensity || 0.6) * 100)),
+                size: Math.max(5, Math.min(60, (effectSettings.size || 0.18) * 100)),
+                color: effectSettings.color || '#3b82f6'
               }}
               isVisible={showEffects}
               selectedPlayerId={validatedPlayer.id}
-              selectedPlayer={validatedPlayer as { id: string; centerX: number; centerY: number; x: number; y: number; width: number; height: number }} // **FIX**: Pass validated player for position matching (centerX/centerY guaranteed by validation logic)
-              detectionTime={detectionTime} // **ACTIVATION TIMING**: Pass absolute timestamp (both state.currentTime and detectionTime use same coordinate system)
+              selectedPlayer={validatedPlayer as { id: string; centerX: number; centerY: number; x: number; y: number; width: number; height: number }}
+              detectionTime={detectionTime}
               sampleTime={state.currentTime}
               realVideoTime={state.currentTime}
               getBoxByIdAtTime={getBoxByIdAtTime}
