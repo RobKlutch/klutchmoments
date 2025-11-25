@@ -248,17 +248,31 @@ export default function CreatorDashboard() {
       lastDetectedTimestampRef.current = roundedTimestamp;
       addLog(`Capturing frame at ${timestamp.toFixed(2)}s for player detection`);
       
-      // ZERO-LAG OPTIMIZATION: Send Blob via FormData (60% smaller, no base64 overhead)
-      const formData = new FormData();
-      formData.append('frame', frameBlob, 'frame.jpg');
-      formData.append('timestampMs', Math.round(timestamp * 1000).toString());
-      formData.append('videoId', workflow.sessionId || 'fallback-session'); // **CRITICAL**: Use sessionId for isolated tracking
-      formData.append('detectionMethod', 'replicate');
-      
+      // UNIFIED VIDEO MODEL: send JSON payload with videoUrl instead of per-frame image
+      if (!workflow.videoUrl) {
+        console.error('❌ Cannot run detection: missing videoUrl in workflow state');
+        addLog('Player detection error: Missing videoUrl in workflow state');
+        return;
+      }
+
+      const payload = {
+        videoUrl: workflow.videoUrl,
+        timestampMs: Math.round(timestamp * 1000),
+        sessionId: workflow.sessionId || 'fallback-session',
+        videoId: workflow.sessionId || 'fallback-session',
+        detectionMethod: 'replicate',
+        // At timeline stage we may not have a selectedPlayer yet
+        selectedPlayerId: workflow.selectedPlayer?.id ?? null,
+        selectedPlayer: workflow.selectedPlayer ?? null
+      };
+
       const response = await fetch('/api/detect-players', {
         method: 'POST',
-        credentials: 'include', // **CRITICAL FIX**: Include session cookies
-        body: formData // FormData sets Content-Type with boundary automatically
+        credentials: 'include', // keep auth/session behavior
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
       });
 
       // **FIX**: Handle 401 authentication errors to prevent retry loops
@@ -822,10 +836,10 @@ export default function CreatorDashboard() {
         playerSelection: playerData, // **FIXED**: Use playerSelection instead of selectedPlayer
         effectConfig: {
           type: workflow.selectedEffect.effect.id || workflow.selectedEffect.effect,
-        settings: workflow.selectedEffect.settings || {}
-      },
-      templateId: null,
-      priority: 5
+          settings: workflow.selectedEffect.settings || {}
+        },
+        templateId: null,
+        priority: 5
       };
 
       // **LOG SAFE DATA**: Never log bare selectedPlayer, use playerData instead
