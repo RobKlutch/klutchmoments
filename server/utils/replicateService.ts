@@ -4,30 +4,26 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN || "",
 });
 
-// Direct YOLO detection used by the serverless entrypoint
-export async function detectPlayersDirect(imageBase64: string) {
-  // Prefer dedicated detection model; fall back to YOLO model if needed
-  if (!process.env.REPLICATE_DETECT_MODEL && !process.env.REPLICATE_YOLO_MODEL) {
-    throw new Error("Missing REPLICATE_DETECT_MODEL or REPLICATE_YOLO_MODEL");
+// VIDEO-BASED detection and tracking using BoT-SORT
+export async function detectPlayersDirect(videoBase64: string) {
+  const modelId =
+    process.env.REPLICATE_DETECT_MODEL ||
+    process.env.REPLICATE_YOLO_MODEL;
+
+  if (!modelId) {
+    throw new Error("Missing REPLICATE_YOLO_MODEL / REPLICATE_DETECT_MODEL");
   }
 
-  const modelId =
-    process.env.REPLICATE_DETECT_MODEL || process.env.REPLICATE_YOLO_MODEL!;
-
-  // Call your YOLO detection model on Replicate
   const result: any = await replicate.run(modelId, {
     input: {
-      // backend expects a data URL
-      image: `data:image/jpeg;base64,${imageBase64}`,
-      confidence: 0.15,
-      iou_threshold: 0.4,
-      max_detections: 25,
+      // IMPORTANT: BoT-SORT expects "video", not "image"
+      video: `data:video/mp4;base64,${videoBase64}`,
     },
   });
 
-  // Normalize to the shape the rest of the app expects
+  // TEMP: Pass raw output forward until we map final schema
   return {
-    players: result?.players || [],
+    players: result?.players ?? [],
     raw: result,
   };
 }

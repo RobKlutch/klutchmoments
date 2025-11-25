@@ -4,7 +4,7 @@ import { detectPlayersDirect } from "./utils/replicateService";
 
 const app = express();
 
-// Use in-memory storage for single frames
+// Use in-memory storage for uploaded video clips
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Optional health check
@@ -12,20 +12,18 @@ app.get("/health", (req: Request, res: Response) => {
   res.json({ ok: true });
 });
 
-// Main YOLO detection endpoint.
-// IMPORTANT: when called via Vercel API route `/api/detect-players`,
-// the Express app may see the path as `/` or `/api/detect-players`.
-// Using "*" ensures it works in both cases.
-app.post("*", upload.single("frame"), async (req: Request, res: Response) => {
+// Main detection endpoint.
+// When deployed via Vercel (`/api/detect-players`), Express may see the path
+// as `/` or `/api/detect-players`, so "*" covers both.
+app.post("*", upload.single("video"), async (req: Request, res: Response) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: "Missing 'frame' upload" });
+      return res.status(400).json({ error: "Missing 'video' upload" });
     }
 
     const buffer = req.file.buffer;
     const base64 = buffer.toString("base64");
 
-    // This will use REPLICATE_DETECT_MODEL if set, otherwise REPLICATE_YOLO_MODEL
     const { players, raw } = await detectPlayersDirect(base64);
 
     res.json({
