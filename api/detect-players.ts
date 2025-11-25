@@ -1,18 +1,10 @@
-// API route adapter: forwards /api/detect-players to the Express app
-// in server/serverlessApp.ts, which handles multipart video upload + Replicate call.
+// Vercel serverless function adapter for /api/detect-players
+// Delegates handling to the Express app defined in server/serverlessApp.ts
 
-import type { NextApiRequest, NextApiResponse } from 'next';
-import app from '../../server/serverlessApp';
+import app from '../server/serverlessApp';
 
-// IMPORTANT: disable Next's built-in body parsing so multer in the Express app
-// can read the multipart/form-data payload (the uploaded video).
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Express apps are just (req, res) => void handlers, so we can delegate directly.
-  return app(req as any, res as any);
+// We keep types as `any` here to avoid coupling to specific Vercel/Next types.
+export default function handler(req: any, res: any) {
+  // Express app signature is (req, res), so we can just forward.
+  return app(req, res);
 }
