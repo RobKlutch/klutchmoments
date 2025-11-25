@@ -19,7 +19,7 @@ interface SimpleVideoPreviewProps {
   videoUrl: string;
   selectedPlayer: DetectedPlayer;
   timeSelection: { start: number; end: number };
-  sessionId: string;
+  sessionId: string; // **NEW**: Unique session ID to isolate tracking per video
   effectSettings: {
     intensity: number;
     size: number;
@@ -56,7 +56,7 @@ export function SimpleVideoPreview({
     sessionId: sessionId,
     videoUrl: videoUrl?.substring(0, 50)
   });
-
+  
   useEffect(() => {
     const validationErrors: string[] = [];
     
@@ -97,85 +97,54 @@ export function SimpleVideoPreview({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const detectionIntervalRef = useRef<number | null>(null);
   const rafIdRef = useRef<number | null>(null);
-
+  
   const loopOwnerRef = useRef<string | null>(null);
   const loopSessionId = useRef<string>(`loop_${sessionId}_${Date.now()}`);
   const rafLoopCountRef = useRef(0);
-
-  const videoBlobRef = useRef<Blob | null>(null);
-
-  const getVideoBlob = useCallback(async (): Promise<Blob | null> => {
-    try {
-      if (!videoUrl) {
-        console.error('❌ No videoUrl available for Blob fetch');
-        return null;
-      }
-
-      if (!videoBlobRef.current) {
-        console.log('⬇️ Fetching video Blob from videoUrl for detection:', {
-          videoUrl: videoUrl.substring(0, 80)
-        });
-        const res = await fetch(videoUrl);
-        const blob = await res.blob();
-        videoBlobRef.current = blob;
-      }
-
-      return videoBlobRef.current;
-    } catch (err) {
-      console.error('❌ Failed to fetch video Blob from videoUrl:', err);
-      return null;
-    }
-  }, [videoUrl]);
   
-  const rafDebugOnceRef = useRef(false);
+  useEffect(() => {
+    const newLoopId = `loop_${sessionId}_${Date.now()}`;
+    loopSessionId.current = newLoopId;
+    console.log('🔄 Loop session ID updated for new session:', { sessionId, loopId: newLoopId });
+  }, [sessionId]);
+  
   const listenersRef = useRef<Array<[EventTarget, string, EventListener]>>([]);
-
+  
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(timeSelection.start);
   const [duration, setDuration] = useState(0);
   const [trackedPosition, setTrackedPosition] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
-    const newLoopId = `loop_${sessionId}_${Date.now()}`;
-    loopSessionId.current = newLoopId;
-    console.log('🔄 Loop session ID updated for new session:', { sessionId, loopId: newLoopId });
-    videoBlobRef.current = null;
-  }, [sessionId]);
-
-  useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     video.currentTime = timeSelection.start;
-
     setTrackedPosition(null);
-
+    console.log('🧹 Cleared frontend tracking data, video set to clip start:', timeSelection.start);
+    
     const handleLoadedMetadata = () => {
       setDuration(video.duration);
       console.log('✅ Video metadata loaded:', { duration: video.duration });
     };
     
     const handleCanPlay = async () => {
-      console.log('🚀 Running initial detection for clip (video-based)');
+      console.log('🚀 Running initial detection for clip (video URL based)');
       
       try {
-        const videoBlob = await getVideoBlob();
-        if (!videoBlob) {
-          console.error('❌ No videoBlob available for initial detection');
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append('video', videoBlob, 'clip.mp4');
-        formData.append('timestampMs', (video.currentTime * 1000).toString());
-        formData.append('videoId', sessionId);
-        formData.append('detectionMethod', 'replicate');
-        formData.append('selectedPlayerId', selectedPlayer.id);
-
         const response = await fetch('/api/detect-players', {
           method: 'POST',
           credentials: 'include',
-          body: formData
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            videoUrl,
+            timestampMs: video.currentTime * 1000,
+            videoId: sessionId,
+            detectionMethod: 'replicate',
+            selectedPlayerId: selectedPlayer.id,
+          }),
         });
 
         const data = await response.json();
@@ -184,21 +153,24 @@ export function SimpleVideoPreview({
           success: data.success,
           playerCount: data.players?.length || 0,
           hasSelectedPlayer: !!data.selectedPlayer,
-          selectedPlayerData: data.selectedPlayer
+          selectedPlayerData: data.selectedPlayer,
+          raw: data.raw,
         });
 
-        if (data.success && data.selectedPlayer) {
-          const player = data.selectedPlayer;
-          if (typeof player.centerX === 'number' && typeof player.centerY === 'number') {
-            setTrackedPosition({
-              x: player.centerX,
-              y: player.centerY
-            });
-            console.log('✅ Initial spotlight position set (video-based):', {
-              x: player.centerX,
-              y: player.centerY
-            });
-          }
+        const candidate =
+          data.selectedPlayer ||
+          data.players?.find((p: DetectedPlayer) => p.id === selectedPlayer.id) ||
+          data.players?.[0];
+
+        if (candidate && typeof candidate.centerX === 'number' && typeof candidate.centerY === 'number') {
+          setTrackedPosition({
+            x: candidate.centerX,
+            y: candidate.centerY,
+          });
+          console.log('✅ Initial spotlight position set (video-based):', {
+            x: candidate.centerX,
+            y: candidate.centerY,
+          });
         }
 
         startRAFLoop();
@@ -250,35 +222,31 @@ export function SimpleVideoPreview({
         rafIdRef.current = null;
       }
     };
-  }, [timeSelection.start, timeSelection.end, sessionId, selectedPlayer, getVideoBlob]);
+  }, [timeSelection.start, timeSelection.end, sessionId, selectedPlayer, videoUrl]);
 
   const startDetection = useCallback(() => {
     if (detectionIntervalRef.current) return;
 
-    console.log('🎯 Starting detection (video-based pipeline)');
+    console.log('🎯 Starting detection (video URL pipeline)');
 
     const runDetection = async () => {
       const video = videoRef.current;
       if (!video || video.paused) return;
 
       try {
-        const videoBlob = await getVideoBlob();
-        if (!videoBlob) {
-          console.error('❌ No videoBlob available for detection');
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append('video', videoBlob, 'clip.mp4');
-        formData.append('timestampMs', (video.currentTime * 1000).toString());
-        formData.append('videoId', sessionId);
-        formData.append('detectionMethod', 'replicate');
-        formData.append('selectedPlayerId', selectedPlayer.id);
-
         const response = await fetch('/api/detect-players', {
           method: 'POST',
           credentials: 'include',
-          body: formData
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            videoUrl,
+            timestampMs: video.currentTime * 1000,
+            videoId: sessionId,
+            detectionMethod: 'replicate',
+            selectedPlayerId: selectedPlayer.id,
+          }),
         });
 
         const data = await response.json();
@@ -288,56 +256,26 @@ export function SimpleVideoPreview({
           playerCount: data.players?.length || 0,
           hasSelectedPlayer: !!data.selectedPlayer,
           selectedPlayerData: data.selectedPlayer,
-          fullResponse: data
+          raw: data.raw,
         });
         
-        if (data.success && data.selectedPlayer) {
-          const player = data.selectedPlayer;
-          
-          console.log('🔍 Player object received (video-based):', { 
-            player,
-            centerX: player.centerX,
-            centerY: player.centerY,
+        const candidate =
+          data.selectedPlayer ||
+          data.players?.find((p: DetectedPlayer) => p.id === selectedPlayer.id) ||
+          data.players?.[0];
+
+        if (candidate && typeof candidate.centerX === 'number' && typeof candidate.centerY === 'number') {
+          setTrackedPosition({
+            x: candidate.centerX,
+            y: candidate.centerY,
           });
-          
-          if (typeof player.centerX === 'number' && typeof player.centerY === 'number') {
-            setTrackedPosition({
-              x: player.centerX,
-              y: player.centerY
-            });
-            
-            console.log('✅ Tracked position updated (video-based):', { 
-              id: player.id, 
-              centerX: player.centerX, 
-              centerY: player.centerY,
-            });
-          } else {
-            console.warn('⚠️ Invalid selectedPlayer coordinates:', player);
-          }
-        } else if (data.success && data.players && data.players.length > 0) {
-          const player =
-            data.players.find((p: DetectedPlayer) => p.id === selectedPlayer.id) ||
-            data.players[0];
-          
-          console.log('🔄 FALLBACK: Using player from array (video-based):', { 
-            playerId: player.id,
-            centerX: player.centerX,
-            centerY: player.centerY
+          console.log('✅ Tracked position updated (video-based):', { 
+            id: candidate.id, 
+            centerX: candidate.centerX, 
+            centerY: candidate.centerY,
           });
-          
-          if (player && typeof player.centerX === 'number' && typeof player.centerY === 'number') {
-            setTrackedPosition({
-              x: player.centerX,
-              y: player.centerY
-            });
-            console.log('✅ Spotlight position updated (fallback):', {
-              id: player.id,
-              x: player.centerX,
-              y: player.centerY
-            });
-          }
         } else {
-          console.log('ℹ️ No selectedPlayer or players detected in clip');
+          console.log('ℹ️ No valid player coordinates returned for this tick');
         }
       } catch (error) {
         console.error('❌ Detection failed (video-based):', error);
@@ -346,7 +284,7 @@ export function SimpleVideoPreview({
 
     runDetection();
     detectionIntervalRef.current = window.setInterval(runDetection, 1000);
-  }, [getVideoBlob, sessionId, selectedPlayer.id]);
+  }, [videoUrl, sessionId, selectedPlayer.id]);
 
   const stopDetection = useCallback(() => {
     if (detectionIntervalRef.current) {
@@ -356,9 +294,22 @@ export function SimpleVideoPreview({
     }
   }, []);
 
+  const rafDebugOnceRef = useRef(false);
+
   const renderSpotlight = useCallback(() => {
     const canvas = canvasRef.current;
     const video = videoRef.current;
+    
+    if (!rafDebugOnceRef.current && trackedPosition) {
+      console.info('[Preview:effect-at-first-RAF]', JSON.stringify({
+        effectId: selectedEffect.effect.id,
+        effectName: selectedEffect.effect.name,
+        settings: effectSettings,
+        trackedPosition,
+        timestamp: video?.currentTime
+      }));
+      rafDebugOnceRef.current = true;
+    }
     
     if (!canvas || !video || !trackedPosition) {
       return;
@@ -474,6 +425,51 @@ export function SimpleVideoPreview({
       sessionId: loopSessionId.current 
     });
   }, []);
+
+  const addEventListener = useCallback((target: EventTarget, event: string, handler: EventListener) => {
+    target.addEventListener(event, handler);
+    listenersRef.current.push([target, event, handler]);
+  }, []);
+
+  const removeAllListeners = useCallback(() => {
+    const count = listenersRef.current.length;
+    for (const [target, event, handler] of listenersRef.current) {
+      target.removeEventListener(event, handler);
+    }
+    listenersRef.current = [];
+    console.log('🧹 Removed all event listeners:', { count });
+  }, []);
+
+  const dispose = useCallback(() => {
+    console.log('🗑️ DISPOSE called for Video Preview:', { 
+      sessionId,
+      loopIterations: rafLoopCountRef.current,
+      activeListeners: listenersRef.current.length 
+    });
+    
+    stopRAFLoop();
+    
+    if (detectionIntervalRef.current) {
+      clearInterval(detectionIntervalRef.current);
+      detectionIntervalRef.current = null;
+    }
+    
+    removeAllListeners();
+    
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    
+    console.log('✅ Video Preview disposed successfully');
+  }, [sessionId, stopRAFLoop, removeAllListeners]);
+
+  useEffect(() => {
+    return () => {
+      dispose();
+    };
+  }, [dispose]);
 
   const togglePlayPause = useCallback(() => {
     const video = videoRef.current;
